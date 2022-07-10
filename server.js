@@ -7,7 +7,8 @@ var app = express();
 
 app.use(express.static('public'));
 
-var httpServer = app.listen(3000, () => console.log("Server iniciado"));
+const PORT = process.env.PORT
+var httpServer = app.listen(PORT || 80, () => console.log("Server iniciado"));
 
 const wss = new ws.Server({server : httpServer});
 
