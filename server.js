@@ -1,4 +1,3 @@
-const http = require('http');
 const ws = require('ws');
 const Trivia = require('./trivia.js');
 const express = require('express');
@@ -16,12 +15,6 @@ wss.on('connection', onSocketConnect);
 
 const clients = new Set();
 
-const server = http.createServer((req, res) => {
-  // aquí solo manejamos conexiones websocket
-  // en proyectos reales tendremos también algún código para manejar peticiones no websocket
-  wss.handleUpgrade(req, req.socket, Buffer.alloc(0), onSocketConnect);
-  
-});
 
 var juegos = []
 
@@ -125,5 +118,3 @@ function manejarMensaje(mensaje, ws){
   }
 
 }
-
-server.listen(9000, 'localhost')
