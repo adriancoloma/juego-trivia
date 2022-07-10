@@ -146,7 +146,7 @@ function handleMessage(evento){
 }
 
 
-let socket = new WebSocket("ws://" + window.location.host);
+let socket = new WebSocket("wss://" + window.location.host);
 socket.onmessage = handleMessage;
 
 btnCrear.addEventListener('click', crearJuego, false);
