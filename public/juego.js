@@ -9,6 +9,10 @@ var campoPwd = document.getElementById("campo_pwd");
 var soyLider = false;
 var salida = document.querySelector('#salida');
 
+let socket = new WebSocket("ws://" + window.location.host);
+
+setInterval(() => {socket.send('{"tipo" : "ping"}'), 1000})
+
 function cambiarBotones(){
     btnCrear.style.display = 'none';
     btnUnirse.style.display = 'none';
@@ -146,7 +150,6 @@ function handleMessage(evento){
 }
 
 
-let socket = new WebSocket("wss://" + window.location.host);
 socket.onmessage = handleMessage;
 
 btnCrear.addEventListener('click', crearJuego, false);
