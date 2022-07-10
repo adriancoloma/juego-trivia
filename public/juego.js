@@ -9,7 +9,7 @@ var campoPwd = document.getElementById("campo_pwd");
 var soyLider = false;
 var salida = document.querySelector('#salida');
 
-let socket = new WebSocket("ws://" + window.location.host);
+let socket = new WebSocket("wss://" + window.location.host);
 
 setInterval(() => {socket.send('{"tipo" : "ping"}'), 1000})
 
