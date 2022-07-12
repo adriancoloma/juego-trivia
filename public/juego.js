@@ -9,7 +9,7 @@ var campoPwd = document.getElementById("campo_pwd");
 var soyLider = false;
 var salida = document.querySelector('#salida');
 
-let socket = new WebSocket("wss://" + window.location.host);
+let socket = new WebSocket("ws://" + window.location.host);
 
 setInterval(() => {if(socket.readyState == socket.OPEN) {socket.send('{"tipo" : "ping"}'), 1000}});
 
@@ -112,6 +112,12 @@ function addPregunta(){
     var numPreguntas = document.createElement("input");
     numPreguntas.type = "number";
     numPreguntas.name = "num_preguntas";
+
+    var maxOpciones = 5, minOpciones = 2;
+
+    numPreguntas.min = maxOpciones;
+    numPreguntas.max = minOpciones;
+
     divPregunta.appendChild(numPreguntas);
     var botonOpciones = document.createElement("button");
     
@@ -119,7 +125,13 @@ function addPregunta(){
     botonEnviar.classList.add("btn", "btn-primary");
     botonEnviar.textContent = "Enviar pregunta";
     botonEnviar.onclick = () =>{
+
         var preguntaInput = document.querySelector('input[name="pregunta"]');
+        if(preguntaInput.value == ""){
+            alert("Debes escribir una pregunta");
+            return;
+        }
+
         var opcionesInput = document.querySelectorAll(".opcion");  
         var opcionCorrecta = document.querySelector('input[name="opcion_correcta"]:checked');
         if(opcionCorrecta == null){
@@ -128,6 +140,17 @@ function addPregunta(){
         }
         var opciones = [];
         opcionesInput.forEach(opcionElement => opciones.push(opcionElement.value));
+        for(const opcion of opciones){
+            if(opcion == ""){
+                alert("Debes llenar todas las opciones");
+                return;
+            }else{
+                if(opciones.indexOf(opcion) != opciones.lastIndexOf(opcion)){
+                    alert("No puedes repetir opciones");
+                    return;
+                }
+            }
+        }
 
         var preguntaObj = {"pregunta" : preguntaInput.value, "opciones" : opciones, "respuesta" : parseInt(opcionCorrecta.value)};
         var json = {"tipo" : "pregunta", "id_sesion" : id_sesion, "pregunta" : preguntaObj};
@@ -139,6 +162,11 @@ function addPregunta(){
     botonOpciones.textContent = "Añadir opciones";
 
     botonOpciones.onclick = () =>{
+        if(numPreguntas.value == "" || numPreguntas.valueAsNumber < minOpciones || numPreguntas.valueAsNumber> maxOpciones){
+            alert("Numero de opciones invalido");
+            return;
+        }
+
         for(var i = 0; i < numPreguntas.valueAsNumber; i++){
             divPregunta.appendChild(document.createElement("br"));
             var inputOpcion = document.createElement("input");
