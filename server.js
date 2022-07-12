@@ -64,6 +64,9 @@ function cargarPreguntasArchivo(juego){
   juego.addPreguntas(json.preguntas);
 }
 
+function getJuego(idSesion){
+  return juegos[idSesion];
+}
 function unirseJuego(jugador, idSesion, pwd, ws){
   var juego = juegos[idSesion];
   var esValida = juego.validarPassword(pwd);
@@ -114,8 +117,13 @@ function manejarMensaje(mensaje, ws){
       if(esCorrecto){
         juego.addPunto(ws);
       }
-
+    
+    case "pregunta":
+      getJuego(json.id_sesion).addPregunta(json.pregunta);
+      console.log("Se añadio la pregunta " + json.pregunta);
       break;
   }
 
 }
+
+

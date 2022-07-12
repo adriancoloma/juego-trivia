@@ -11,6 +11,10 @@ class Trivia{
         this.preguntas = preguntas;
     }
 
+    addPregunta(pregunta){
+        this.preguntas.push(pregunta);
+    }
+
     addJugador(jugador, ws){
         this.jugadores.set(ws, {"nick" : jugador, "puntaje" : 0});
     }

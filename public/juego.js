@@ -95,7 +95,66 @@ function mostrarResultados(json){
         var h2 = document.createElement('h2');
         h2.textContent = puntajeObj.nick + ": " + puntajeObj.puntaje;
         salida.appendChild(h2);
-    })
+    });
+
+}
+
+function addPregunta(){
+    var divPregunta = document.createElement("div");
+    divPregunta.innerHTML = 'Pregunta: <input type="text" name="pregunta"><br>Numero de opciones: ';
+    var numPreguntas = document.createElement("input");
+    numPreguntas.type = "number";
+    numPreguntas.name = "num_preguntas";
+    divPregunta.appendChild(numPreguntas);
+    var botonOpciones = document.createElement("button");
+    
+    var botonEnviar = document.createElement("button");
+    botonEnviar.classList.add("btn", "btn-primary");
+    botonEnviar.textContent = "Enviar pregunta";
+    botonEnviar.onclick = () =>{
+        var preguntaInput = document.querySelector('input[name="pregunta"]');
+        var opcionesInput = document.querySelectorAll(".opcion");  
+        var opcionCorrecta = document.querySelector('input[name="opcion_correcta"]:checked');
+        
+        var opciones = [];
+        opcionesInput.forEach(opcionElement => opciones.push(opcionElement.value));
+
+        var preguntaObj = {"pregunta" : preguntaInput.value, "opciones" : opciones, "respuesta" : parseInt(opcionCorrecta.value)};
+        var json = {"tipo" : "pregunta", "id_sesion" : id_sesion, "pregunta" : preguntaObj};
+
+        socket.send(JSON.stringify(json));
+    };
+
+    botonOpciones.textContent = "Añadir opciones";
+
+    botonOpciones.onclick = () =>{
+        for(var i = 0; i < numPreguntas.valueAsNumber; i++){
+            divPregunta.appendChild(document.createElement("br"));
+            var inputOpcion = document.createElement("input");
+            inputOpcion.classList.add("opcion")
+            inputOpcion.type = "text";
+            var checkOpcion = document.createElement("input");
+            checkOpcion.type = "radio";
+            checkOpcion.name = "opcion_correcta";
+            checkOpcion.value = i;
+        
+            divPregunta.appendChild(inputOpcion);
+            divPregunta.appendChild(checkOpcion);          
+        }
+
+        divPregunta.appendChild(document.createElement("br"));
+        botonEnviar.classList.add("m-2");
+        divPregunta.appendChild(botonEnviar);
+    };
+
+    
+    botonOpciones.classList.add("btn", "btn-primary");
+
+    botonOpciones.classList.add("m-2");
+    divPregunta.appendChild(botonOpciones);
+    
+
+    salida.appendChild(divPregunta);
 
 }
 
@@ -119,7 +178,22 @@ function handleMessage(evento){
                 botonIniciar.onclick = iniciarJuego;
                 botonIniciar.textContent = "Iniciar juego";
                 salida.appendChild(botonIniciar);
+            }else{
+                var esperando = document.createElement('p');
+                esperando.textContent = 'Esperando al lider...';
+                esperando.classList.add("text-info");
+                salida.appendChild(esperando);
             }
+
+            var buttonAddPregunta = document.createElement("button");
+            buttonAddPregunta.classList.add("btn", "btn-primary");
+            buttonAddPregunta.onclick = () =>{
+                addPregunta();
+            };
+
+            buttonAddPregunta.textContent = "Añadir pregunta";
+            buttonAddPregunta.classList.add("m-2");
+            salida.appendChild(buttonAddPregunta);
             break;
 
         case "pregunta":
