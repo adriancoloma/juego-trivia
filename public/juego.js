@@ -123,6 +123,7 @@ function addPregunta(){
         var json = {"tipo" : "pregunta", "id_sesion" : id_sesion, "pregunta" : preguntaObj};
 
         socket.send(JSON.stringify(json));
+        divPregunta.innerHTML = '<p class="text-info">Respuesta añadida</p>'
     };
 
     botonOpciones.textContent = "Añadir opciones";
@@ -157,6 +158,7 @@ function addPregunta(){
     salida.appendChild(divPregunta);
 
 }
+
 
 function handleMessage(evento){
     mensaje = evento.data;
