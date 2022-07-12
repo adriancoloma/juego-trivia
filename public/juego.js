@@ -11,7 +11,7 @@ var salida = document.querySelector('#salida');
 
 let socket = new WebSocket("wss://" + window.location.host);
 
-setInterval(() => {socket.send('{"tipo" : "ping"}'), 1000})
+setInterval(() => {if(socket.readyState == socket.OPEN) {socket.send('{"tipo" : "ping"}'), 1000}});
 
 function cambiarBotones(){
     btnCrear.style.display = 'none';
@@ -19,12 +19,18 @@ function cambiarBotones(){
     btnOk.style.display = 'inline';
 }
 function crearJuego(){
+    if(campo_nick.lastElementChild.value == ""){
+        return;
+    }
     campo_nick.style.display = 'none';
     campoPwd.style.display = 'block';
     cambiarBotones();
 }
 
 function unirse(){
+    if(campo_nick.lastElementChild.value == ""){
+        return;
+    }
     campo_nick.style.display = 'none';
     campoId.style.display = 'block';
     campoPwd.style.display = 'block';
@@ -98,9 +104,10 @@ function mostrarResultados(json){
     });
 
 }
+var divPregunta = document.createElement("div");
 
 function addPregunta(){
-    var divPregunta = document.createElement("div");
+    
     divPregunta.innerHTML = 'Pregunta: <input type="text" name="pregunta"><br>Numero de opciones: ';
     var numPreguntas = document.createElement("input");
     numPreguntas.type = "number";
@@ -115,7 +122,10 @@ function addPregunta(){
         var preguntaInput = document.querySelector('input[name="pregunta"]');
         var opcionesInput = document.querySelectorAll(".opcion");  
         var opcionCorrecta = document.querySelector('input[name="opcion_correcta"]:checked');
-        
+        if(opcionCorrecta == null){
+            alert("Debes seleccionar una respuesta correcta");
+            return;
+        }
         var opciones = [];
         opcionesInput.forEach(opcionElement => opciones.push(opcionElement.value));
 
@@ -123,7 +133,7 @@ function addPregunta(){
         var json = {"tipo" : "pregunta", "id_sesion" : id_sesion, "pregunta" : preguntaObj};
 
         socket.send(JSON.stringify(json));
-        divPregunta.innerHTML = '<p class="text-info">Respuesta añadida</p>'
+        divPregunta.innerHTML = '<p class="text-sucess">Pregunta añadida</p>'
     };
 
     botonOpciones.textContent = "Añadir opciones";
@@ -190,6 +200,7 @@ function handleMessage(evento){
             var buttonAddPregunta = document.createElement("button");
             buttonAddPregunta.classList.add("btn", "btn-primary");
             buttonAddPregunta.onclick = () =>{
+                divPregunta.innerHTML = '';
                 addPregunta();
             };
 
@@ -227,6 +238,7 @@ function handleMessage(evento){
 
 
 socket.onmessage = handleMessage;
+socket.onclose = () =>{salida.innerHTML = '<h1 class="text-danger">Error al conectar al servidor</h1>'}
 
 btnCrear.addEventListener('click', crearJuego, false);
 btnUnirse.addEventListener('click', unirse, false);

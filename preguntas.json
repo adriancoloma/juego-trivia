@@ -1,7 +1,4 @@
 {
     "preguntas" : [
-        {"pregunta" : "¿Cual fue el primer presidente del Ecuador?", "opciones": ["Vicente Rocafuerte", "Juan Jose Flores", "Rafael Correa"], "respuesta" : 1} ,
-        {"pregunta" : "¿Quien fundo la Gran Colombia?", "opciones": ["Simon Bolivar", "Sucre", "Pizarro"], "respuesta" : 0},
-        {"pregunta" : "¿Cual es la capital de Ecuador?", "opciones": ["Quito", "Caracas", "Lima"], "respuesta" : 0}
     ]
 }
