@@ -160,6 +160,7 @@ function addPregunta(){
     };
 
     botonOpciones.textContent = "Añadir opciones";
+    var divOpciones = document.createElement("div");
 
     botonOpciones.onclick = () =>{
         if(numPreguntas.value == "" || numPreguntas.valueAsNumber < minOpciones || numPreguntas.valueAsNumber> maxOpciones){
@@ -167,8 +168,11 @@ function addPregunta(){
             return;
         }
 
+        divOpciones.innerHTML = "";
+
         for(var i = 0; i < numPreguntas.valueAsNumber; i++){
-            divPregunta.appendChild(document.createElement("br"));
+            
+            divOpciones.appendChild(document.createElement("br"));
             var inputOpcion = document.createElement("input");
             inputOpcion.classList.add("opcion")
             inputOpcion.type = "text";
@@ -177,13 +181,15 @@ function addPregunta(){
             checkOpcion.name = "opcion_correcta";
             checkOpcion.value = i;
         
-            divPregunta.appendChild(inputOpcion);
-            divPregunta.appendChild(checkOpcion);          
+            divOpciones.appendChild(inputOpcion);
+            divOpciones.appendChild(checkOpcion);          
         }
 
-        divPregunta.appendChild(document.createElement("br"));
+        divOpciones.appendChild(document.createElement("br"));
         botonEnviar.classList.add("m-2");
-        divPregunta.appendChild(botonEnviar);
+        divOpciones.appendChild(botonEnviar);
+
+        divPregunta.appendChild(divOpciones);
     };
 
     
