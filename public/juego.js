@@ -183,6 +183,8 @@ function addPregunta(){
             var inputOpcion = document.createElement("input");
             inputOpcion.classList.add("opcion")
             inputOpcion.type = "text";
+            inputOpcion.classList.add("m-2");
+
             var checkOpcion = document.createElement("input");
             checkOpcion.type = "radio";
             checkOpcion.name = "opcion_correcta";
