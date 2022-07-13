@@ -76,7 +76,7 @@ function unirseJuego(jugador, idSesion, pwd, ws){
     juego.addJugador(jugador, ws);
     juego.jugadores.forEach((datos, socket) => enviarInformacionJuego(juego, socket));
   }else{
-    console.log("Contraseña invalida");
+    ws.send(JSON.stringify({"tipo" : "password_incorrecta"}));
   }
 }
 

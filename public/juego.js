@@ -312,6 +312,8 @@ function handleMessage(evento){
             infoJuego.tiempo_pregunta = json.tiempo_pregunta;
             infoJuego.maximo_preguntas = json.maximo_preguntas;
             break;
+        case "password_incorrecta":
+            alert("Contraseña incorrecta");
     }
 }
 
