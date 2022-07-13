@@ -71,12 +71,17 @@ function getJuego(idSesion){
 }
 function unirseJuego(jugador, idSesion, pwd, ws){
   var juego = juegos[idSesion];
+  if (juego == undefined){
+    ws.send(JSON.stringify({tipo : "error", mensaje : "No existe la sesion"}));
+    return;
+  }
+
   var esValida = juego.validarPassword(pwd);
   if(esValida){
     juego.addJugador(jugador, ws);
     juego.jugadores.forEach((datos, socket) => enviarInformacionJuego(juego, socket));
   }else{
-    ws.send(JSON.stringify({"tipo" : "password_incorrecta"}));
+    ws.send(JSON.stringify({tipo : "error", mensaje : "Password incorrecta"}));
   }
 }
 
