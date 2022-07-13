@@ -5,6 +5,8 @@ class Trivia{
         this.lider = lider;
         this.jugadores = new Map();
         this.preguntaActual = 0;
+        this.tiempoPregunta = 10;
+        this.maximoPreguntas = 10;
     }
 
     addPreguntas(preguntas){

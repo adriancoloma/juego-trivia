@@ -13,6 +13,8 @@ let socket = new WebSocket("ws://" + window.location.host);
 
 setInterval(() => {if(socket.readyState == socket.OPEN) {socket.send('{"tipo" : "ping"}'), 1000}});
 
+var infoJuego = {"id_sesion" : "", "tiempo_pregunta" : 10, "maximo_preguntas" : 10};
+
 function cambiarBotones(){
     btnCrear.style.display = 'none';
     btnUnirse.style.display = 'none';
@@ -61,7 +63,7 @@ function jugadoresToTable(jugadores){
 var id_sesion;
 
 function iniciarJuego(){
-    socket.send(JSON.stringify({"tipo" : "iniciar_juego", "id_sesion" : id_sesion}));
+    socket.send(JSON.stringify({"tipo" : "iniciar_juego", "id_sesion" : infoJuego.id_sesion}));
 }
 
 function mostrarPregunta(pregunta){
@@ -105,9 +107,13 @@ function mostrarResultados(json){
 
 }
 var divPregunta = document.createElement("div");
+var numPreguntasAdd = 0;
 
 function addPregunta(){
-    
+    if(numPreguntasAdd >= infoJuego.maximo_preguntas){
+        alert("Ya no puedes agregar más preguntas");
+        return;
+    }
     divPregunta.innerHTML = 'Pregunta: <input type="text" name="pregunta"><br>Numero de opciones: ';
     var numPreguntas = document.createElement("input");
     numPreguntas.type = "number";
@@ -153,10 +159,11 @@ function addPregunta(){
         }
 
         var preguntaObj = {"pregunta" : preguntaInput.value, "opciones" : opciones, "respuesta" : parseInt(opcionCorrecta.value)};
-        var json = {"tipo" : "pregunta", "id_sesion" : id_sesion, "pregunta" : preguntaObj};
+        var json = {"tipo" : "pregunta", "id_sesion" : infoJuego.id_sesion, "pregunta" : preguntaObj};
 
         socket.send(JSON.stringify(json));
         divPregunta.innerHTML = '<p class="text-sucess">Pregunta añadida</p>'
+        numPreguntasAdd++;
     };
 
     botonOpciones.textContent = "Añadir opciones";
@@ -202,7 +209,42 @@ function addPregunta(){
     salida.appendChild(divPregunta);
 
 }
+var divConfiguracion = document.createElement("div");
+function configurarJuego(){
+    divConfiguracion.innerHTML = '';
+    divConfiguracion.innerHTML = '<p>Maximo de preguntas a añadir: <input type="number" name="maximo_preguntas" min="2"></p><p>Tiempo por pregunta: <input type="number" name="tiempo_pregunta" min="1"></p>';
+    var botonConfigurar = document.createElement("button");
+    botonConfigurar.classList.add("btn", "btn-primary");
+    botonConfigurar.textContent = "Guardar configuracion";
 
+    botonConfigurar.onclick = () =>{
+        var json = {"tipo" : "configurar_juego", "id_sesion" : infoJuego.id_sesion, 
+        "tiempo_pregunta" : document.querySelector('input[name="tiempo_pregunta"]').valueAsNumber, 
+        "maximo_preguntas" : document.querySelector('input[name="maximo_preguntas"]').value};
+        socket.send(JSON.stringify(json));
+
+        divConfiguracion.innerHTML = '<p class="text-sucess">Configuracion guardada</p>';
+    }
+    botonConfigurar.classList.add("m-2");
+    divConfiguracion.appendChild(botonConfigurar);
+    salida.appendChild(divConfiguracion);
+}
+
+function mostrarInfoLider(){
+    var botonIniciar = document.createElement('button');
+    botonIniciar.classList.add("btn", "btn-primary");
+    botonIniciar.onclick = iniciarJuego;
+    botonIniciar.textContent = "Iniciar juego";
+    botonIniciar.classList.add("m-2");
+    salida.appendChild(botonIniciar);
+
+    var botonConfigurar = document.createElement('button');
+    botonConfigurar.classList.add("btn", "btn-primary");
+    botonConfigurar.textContent = "Configurar juego";
+    botonConfigurar.onclick = configurarJuego;
+    botonConfigurar.classList.add("m-2");
+    salida.appendChild(botonConfigurar);
+}
 
 function handleMessage(evento){
     mensaje = evento.data;
@@ -212,18 +254,16 @@ function handleMessage(evento){
         case "datos_juego":
             var idsesion = document.createElement('h1');
             idsesion.textContent = "Id de sesion: " + json.id_sesion;
-            id_sesion = json.id_sesion;
+            infoJuego.id_sesion = json.id_sesion;
+            infoJuego.tiempo_pregunta = json.tiempo_pregunta;
+            infoJuego.maximo_preguntas = json.maximo_preguntas;
             
             salida.innerHTML = '';
             salida.appendChild(idsesion);
             var tableJugadores = jugadoresToTable(json.jugadores);
             salida.appendChild(tableJugadores);
             if(soyLider){
-                var botonIniciar = document.createElement('button');
-                botonIniciar.classList.add("btn", "btn-primary");
-                botonIniciar.onclick = iniciarJuego;
-                botonIniciar.textContent = "Iniciar juego";
-                salida.appendChild(botonIniciar);
+                mostrarInfoLider();
             }else{
                 var esperando = document.createElement('p');
                 esperando.textContent = 'Esperando al lider...';
@@ -245,18 +285,19 @@ function handleMessage(evento){
 
         case "pregunta":
             salida.innerHTML = '';
-            var contador = 10;
+            var contador = infoJuego.tiempo_pregunta;
             var h1 = document.createElement('h1');
-            h1.textContent = "Tiempo: 10";
+            h1.textContent = "Tiempo: " + contador;
             salida.appendChild(h1);
             setInterval(() => {contador--; h1.textContent = "Tiempo: " + contador;}, 1000);
+            console.log("Se establecio el contador");
             mostrarPregunta(json);
             var botonEnviar = document.createElement('button');
             botonEnviar.textContent = "Enviar";
             botonEnviar.classList.add("btn", "btn-primary")
             botonEnviar.onclick = () => {
                 var respuesta = document.querySelector('input[name="respuesta"]:checked');
-                var jsonEnviar = {"tipo" : "respuesta", "numero_pregunta" : json.numero_pregunta, "id_sesion" : id_sesion, "respuesta" : respuesta.value};
+                var jsonEnviar = {"tipo" : "respuesta", "numero_pregunta" : json.numero_pregunta, "id_sesion" : infoJuego.id_sesion, "respuesta" : respuesta.value};
                 socket.send(JSON.stringify(jsonEnviar));
                 botonEnviar.style.display = "none";
             }
@@ -266,6 +307,10 @@ function handleMessage(evento){
         case "finalizar_juego":
             salida.innerHTML = '';
             mostrarResultados(json);
+            break;
+        case "configurar_juego":
+            infoJuego.tiempo_pregunta = json.tiempo_pregunta;
+            infoJuego.maximo_preguntas = json.maximo_preguntas;
             break;
     }
 }

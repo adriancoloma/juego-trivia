@@ -42,7 +42,9 @@ function getJuego(ws){
 
 function enviarInformacionJuego(juego, ws){
   console.log("id sesion: " + juego.id);
-  var json = {"tipo" : "datos_juego", "id_sesion" : juego.id, "jugadores" : juego.getNickJugadores()};
+  var json = {"tipo" : "datos_juego", "id_sesion" : juego.id, "jugadores" : juego.getNickJugadores()
+      , "tiempo_pregunta" : juego.tiempoPregunta, "maximo_preguntas" : juego.maximoPreguntas};
+  
   var jsonParsed = JSON.stringify(json);
   ws.send(jsonParsed);
   console.log("se envio el mensaje " + jsonParsed);
@@ -108,7 +110,7 @@ function manejarMensaje(mensaje, ws){
       break;
     case "iniciar_juego":
       enviarPregunta(json.id_sesion);
-      intervaloActual = setInterval(() => enviarPregunta(json.id_sesion), 10000)
+      intervaloActual = setInterval(() => enviarPregunta(json.id_sesion), getJuego(json.id_sesion).tiempoPregunta * 1000);
       break;
 
     case "respuesta":
@@ -122,6 +124,13 @@ function manejarMensaje(mensaje, ws){
       getJuego(json.id_sesion).addPregunta(json.pregunta);
       console.log("Se añadio la pregunta " + json.pregunta);
       break;
+    case "configurar_juego":
+      var juego = getJuego(json.id_sesion);
+      juego.tiempoPregunta = json.tiempo_pregunta;
+      juego.maximoPreguntas = json.maximo_preguntas;
+
+      juego.jugadores.forEach((datos, socket) => socket.send(JSON.stringify(json)));
+
   }
 
 }
