@@ -13,7 +13,7 @@ let socket = new WebSocket("ws://" + window.location.host);
 
 setInterval(() => {if(socket.readyState == socket.OPEN) {socket.send('{"tipo" : "ping"}'), 1000}});
 
-var infoJuego = {"id_sesion" : "", "tiempo_pregunta" : 10, "maximo_preguntas" : 10};
+var infoJuego = {"id_sesion" : "", "tiempo_pregunta" : 10, "maximo_preguntas" : 10, "nick" : ""};
 
 function cambiarBotones(){
     btnCrear.style.display = 'none';
@@ -66,10 +66,11 @@ function iniciarJuego(){
     socket.send(JSON.stringify({"tipo" : "iniciar_juego", "id_sesion" : infoJuego.id_sesion}));
 }
 
-function mostrarPregunta(pregunta){
+function preguntaToElement(pregunta){
+    var divPregunta = document.createElement('div');
     var h1 = document.createElement('h1');
     h1.textContent = pregunta.pregunta;
-    salida.appendChild(h1);
+    divPregunta.appendChild(h1);
     var tabla = document.createElement('table');
     tabla.classList.add('table');
     pregunta.opciones.forEach((opcion, i) =>{
@@ -89,10 +90,11 @@ function mostrarPregunta(pregunta){
         row.appendChild(tdInput);
 
         tabla.appendChild(row);
-        //salida.appendChild(document.createElement('br'));
-    })
+        //divPregunta.appendChild(document.createElement('br'));
+    });
 
-    salida.appendChild(tabla);
+    divPregunta.appendChild(tabla);
+    return divPregunta;
 }
 
 function mostrarResultados(json){
@@ -104,7 +106,7 @@ function mostrarResultados(json){
         h2.textContent = puntajeObj.nick + ": " + puntajeObj.puntaje;
         salida.appendChild(h2);
     });
-
+    
 }
 var divPregunta = document.createElement("div");
 var numPreguntasAdd = 0;
@@ -248,6 +250,54 @@ function mostrarInfoLider(){
     salida.appendChild(botonConfigurar);
 }
 
+var divRespuestas = document.createElement("div");
+
+function crearSelectNick(nicks){
+    var select = document.createElement("select");
+    select.classList.add("m-2");
+    select.name = "nick";
+    nicks.forEach(nick => {
+        var option = document.createElement("option");
+        option.value = nick;
+        option.textContent = nick;
+        select.appendChild(option);
+    }
+    );
+    
+    return select;
+}
+
+
+function mostrarRespuestas(respuestas){
+    divRespuestas.innerHTML = '';
+    divRespuestas.innerHTML = '<p>Respuestas:</p>';
+    salida.appendChild(divRespuestas);
+    respuestas.forEach(respuesta => {
+        var divPregunta = preguntaToElement(respuesta.pregunta);
+        divRespuestas.appendChild(divPregunta);
+        var respuestaNumero = respuesta.respuesta;
+        var inputRespuesta = divPregunta.querySelector('input[value="'+respuestaNumero+'"]');
+        inputRespuesta.checked = true; //Marcamos la opcion correcta
+        var inputsRespuesta = divPregunta.querySelectorAll('input[type="radio"]');
+        inputsRespuesta.forEach(input => {
+            input.disabled = true;
+        }
+        );
+        
+        if(respuestaNumero == respuesta.pregunta.respuesta){
+            divPregunta.style.backgroundColor = "aquamarine";
+        }
+        else{
+            divPregunta.style.backgroundColor = "rgb(255, 74, 71)";
+        }
+
+        divRespuestas.appendChild(divPregunta);
+    })
+
+
+    
+
+}
 function handleMessage(evento){
     mensaje = evento.data;
     //console.log("mensaje recibido " + mensaje);
@@ -293,7 +343,7 @@ function handleMessage(evento){
             salida.appendChild(h1);
             setInterval(() => {contador--; h1.textContent = "Tiempo: " + contador;}, 1000);
             console.log("Se establecio el contador");
-            mostrarPregunta(json);
+            salida.appendChild(preguntaToElement(json));
             var botonEnviar = document.createElement('button');
             botonEnviar.textContent = "Enviar";
             botonEnviar.classList.add("btn", "btn-primary")
@@ -309,6 +359,16 @@ function handleMessage(evento){
         case "finalizar_juego":
             salida.innerHTML = '';
             mostrarResultados(json);
+            var nicks = [];
+            json.respuestas.forEach(respuesta => {
+                nicks.push(respuesta.nick);
+            });
+            var select = crearSelectNick(nicks);
+            select.value = infoJuego.nick;
+            select.onchange = () => {mostrarRespuestas(json.respuestas.find(respuesta => respuesta.nick == select.value).respuestas);};
+            salida.appendChild(select);
+            mostrarRespuestas(json.respuestas.find(respuesta => respuesta.nick == infoJuego.nick).respuestas);
+
             break;
         case "configurar_juego":
             infoJuego.tiempo_pregunta = json.tiempo_pregunta;
@@ -338,6 +398,7 @@ form.onclick = function(){
         soyLider = true;
     }
 
+    infoJuego.nick = jsonData.nick;
     var json = JSON.stringify(jsonData);
     socket.send(json);
 }

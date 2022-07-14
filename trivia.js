@@ -18,12 +18,31 @@ class Trivia{
     }
 
     addJugador(jugador, ws){
-        this.jugadores.set(ws, {"nick" : jugador, "puntaje" : 0});
+        this.jugadores.set(ws, {"nick" : jugador, "puntaje" : 0, "respuestas" : []});
     }
 
     esLaRespuestaCorrecta(pregunta, respuesta){
        
         return this.preguntas[pregunta].respuesta == respuesta;
+    }
+
+    responder(ws, numeroPregunta, respuesta){
+        var respondioBien = this.esLaRespuestaCorrecta(numeroPregunta, respuesta);
+        if(respondioBien){
+            this.addPunto(ws);
+        }
+
+        this.jugadores.get(ws).respuestas.push({"pregunta" : this.preguntas[numeroPregunta], "respuesta" : respuesta});
+    }
+
+    getRespuestas(){
+        var respuestas = [];
+        this.jugadores.forEach((datos, socket) =>{
+            respuestas.push({"nick" : datos.nick, "respuestas" : datos.respuestas});
+        }
+        )
+
+        return respuestas;
     }
 
     getSigPregunta(){
@@ -74,8 +93,8 @@ class Trivia{
                 }
             })
 
+            json.respuestas = this.getRespuestas();
             socket.send(JSON.stringify(json));
-
 
         })
     }

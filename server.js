@@ -120,10 +120,9 @@ function manejarMensaje(mensaje, ws){
 
     case "respuesta":
       var juego = juegos[json.id_sesion];
-      var esCorrecto = juego.esLaRespuestaCorrecta(json.numero_pregunta, json.respuesta);
-      if(esCorrecto){
-        juego.addPunto(ws);
-      }
+
+      juego.responder(ws, json.numero_pregunta, json.respuesta);
+      break;
     
     case "pregunta":
       getJuego(json.id_sesion).addPregunta(json.pregunta);
