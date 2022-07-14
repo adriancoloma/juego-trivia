@@ -376,6 +376,8 @@ function handleMessage(evento){
             break;
         case "error":
             alert(json.mensaje);
+        case "error_fatal":
+            salida.innerHTML = '<h1 class="text-danger">' + json.mensaje + '</h1>';
     }
 }
 

@@ -27,16 +27,26 @@ function onSocketConnect(ws) {
   ws.on('close', function() {
     clients.delete(ws);
     var juego;
-    if((juego = getJuego(ws)) != undefined){
-      delete juegos[juegos.indexOf[juego]];
-      console.log('Sesion ' + juego.id + ' eliminada');
+    if((juego = getJuegoDelJugador(ws)) != undefined){
+      if(juego.esLider(ws)){
+        juego.eliminarJugador(ws);
+        juego.jugadores.forEach((datos, socket) => socket.send(JSON.stringify({tipo : "error_fatal", mensaje : "El lider abandonó la sesion"})));
+        delete juegos[juegos.indexOf[juego]];       
+        console.log('Sesion ' + juego.id + ' eliminada');
+      }else{
+        juego.eliminarJugador(ws);
+        juego.jugadores.forEach((datos, socket) => enviarInformacionJuego(juego, socket));
+        console.log('Jugador ' + ws.nickname + ' eliminado');
+      }
+    }else{
+      console.log("El jugador no estaba en ningun juego");
     }
 
     console.log('Un cliente cerro su conexion');
   });
 }
 
-function getJuego(ws){
+function getJuegoDelJugador(ws){
   return juegos.find(juego => {return juego.jugadores.has(ws)});
 }
 

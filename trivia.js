@@ -63,9 +63,7 @@ class Trivia{
         return pwd == this.password;
     }
 
-    esLider(jugador){
-        return this.lider == jugador;
-    }
+
 
     set id(id){
         this.idSesion = id;
@@ -102,6 +100,10 @@ class Trivia{
     esLider(ws){
         return this.jugadores.get(ws).nick == this.lider;
         
+    }
+
+    eliminarJugador(ws){
+        this.jugadores.delete(ws);
     }
 
 
