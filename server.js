@@ -31,7 +31,7 @@ function onSocketConnect(ws) {
       if(juego.esLider(ws)){
         juego.eliminarJugador(ws);
         juego.jugadores.forEach((datos, socket) => socket.send(JSON.stringify({tipo : "error_fatal", mensaje : "El lider abandonó la sesion"})));
-        delete juegos[juegos.indexOf[juego]];       
+        juegos = juegos.filter(juegoActual => juegoActual.id != juego.id);     
         console.log('Sesion ' + juego.id + ' eliminada');
       }else{
         juego.eliminarJugador(ws);
@@ -50,7 +50,12 @@ function onSocketConnect(ws) {
 }
 
 function getJuegoDelJugador(ws){
-  return juegos.find(juego => {return juego.jugadores.has(ws)});
+  return juegos.find(juego => {
+    if(juego == undefined){
+      console.log("Juego indefinido")
+      return false;
+    } 
+    return juego.jugadores.has(ws)});
 }
 
 function enviarInformacionJuego(juego, ws){
