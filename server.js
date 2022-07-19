@@ -73,7 +73,7 @@ function crearJuego(lider, pwd, ws){
   nuevoJuego.addJugador(lider, ws);
   var idSesion = juegos.push(nuevoJuego) - 1;
   nuevoJuego.id = idSesion;
-  cargarPreguntasArchivo(nuevoJuego);
+  //cargarPreguntasArchivo(nuevoJuego);
 
   enviarInformacionJuego(nuevoJuego, ws);
 }
@@ -146,15 +146,20 @@ function manejarMensaje(mensaje, ws){
     
     case "pregunta":
       getJuego(json.id_sesion).addPregunta(json.pregunta);
+      var preguntasGuardadas = JSON.parse(fs.readFileSync('preguntas.json'));
+      preguntasGuardadas.preguntas.push(json.pregunta);
+      fs.writeFileSync('preguntas.json', JSON.stringify(preguntasGuardadas));
+      
       console.log("Se añadio la pregunta " + json.pregunta);
       break;
     case "configurar_juego":
       var juego = getJuego(json.id_sesion);
       juego.tiempoPregunta = json.tiempo_pregunta;
       juego.maximoPreguntas = json.maximo_preguntas;
+      juego.usarPreguntasGuardadas = json.usar_preguntas_guardadas;
 
       juego.jugadores.forEach((datos, socket) => socket.send(JSON.stringify(json)));
-
+      break;
   }
 
 }

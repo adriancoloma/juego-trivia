@@ -20,7 +20,7 @@ let socket = new WebSocket(url);
 
 setInterval(() => {if(socket.readyState == socket.OPEN) {socket.send('{"tipo" : "ping"}'), 1000}});
 
-var infoJuego = {"id_sesion" : "", "tiempo_pregunta" : 10, "maximo_preguntas" : 10, "nick" : ""};
+var infoJuego = {"id_sesion" : "", "tiempo_pregunta" : 10, "maximo_preguntas" : 10, "nick" : "", "usar_preguntas_guardadas" : true};
 
 function cambiarBotones(){
     btnCrear.style.display = 'none';
@@ -222,7 +222,15 @@ function addPregunta(){
 var divConfiguracion = document.createElement("div");
 function configurarJuego(){
     divConfiguracion.innerHTML = '';
-    divConfiguracion.innerHTML = '<p>Maximo de preguntas a añadir: <input type="number" name="maximo_preguntas" min="2"></p><p>Tiempo por pregunta: <input type="number" name="tiempo_pregunta" min="1"></p>';
+    divConfiguracion.innerHTML = `<p>Maximo de preguntas a añadir: <input type="number" name="maximo_preguntas" value="${infoJuego.maximo_preguntas.toString()}" min="2"></p><p>Tiempo por pregunta: <input type="number" name="tiempo_pregunta" value="${infoJuego.tiempo_pregunta}" min="1"></p>`;
+    var inputUsarPreguntasGuardadas = document.createElement("input");
+    inputUsarPreguntasGuardadas.type = "checkbox";
+    inputUsarPreguntasGuardadas.name = "usar_preguntas_guardadas";
+    inputUsarPreguntasGuardadas.checked = infoJuego.usar_preguntas_guardadas;
+    var pUsarPreguntas = document.createElement("p");
+    pUsarPreguntas.innerHTML = "Usar preguntas guardadas: ";
+    pUsarPreguntas.appendChild(inputUsarPreguntasGuardadas);
+    divConfiguracion.appendChild(pUsarPreguntas);
     var botonConfigurar = document.createElement("button");
     botonConfigurar.classList.add("btn", "btn-primary");
     botonConfigurar.textContent = "Guardar configuracion";
@@ -230,7 +238,8 @@ function configurarJuego(){
     botonConfigurar.onclick = () =>{
         var json = {"tipo" : "configurar_juego", "id_sesion" : infoJuego.id_sesion, 
         "tiempo_pregunta" : document.querySelector('input[name="tiempo_pregunta"]').valueAsNumber, 
-        "maximo_preguntas" : document.querySelector('input[name="maximo_preguntas"]').value};
+        "maximo_preguntas" : document.querySelector('input[name="maximo_preguntas"]').value,
+        "usar_preguntas_guardadas" : inputUsarPreguntasGuardadas.checked};
         socket.send(JSON.stringify(json));
 
         divConfiguracion.innerHTML = '<p class="text-sucess">Configuracion guardada</p>';
@@ -381,6 +390,7 @@ function handleMessage(evento){
         case "configurar_juego":
             infoJuego.tiempo_pregunta = json.tiempo_pregunta;
             infoJuego.maximo_preguntas = json.maximo_preguntas;
+            infoJuego.usar_preguntas_guardadas = json.usar_preguntas_guardadas;
             break;
         case "error":
             alert(json.mensaje);

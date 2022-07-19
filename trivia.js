@@ -16,6 +16,40 @@ class Trivia{
         this.tiempoPregunta = 10;
         this.maximoPreguntas = 10;
         this.estado = Trivia.estados.esperando_jugadores;
+        this.usarArchivo = true;
+        this.preguntas = this.cargarPreguntas("preguntas.json");
+        this.preguntasCargadas = this.preguntas;
+        this.numeroPreguntasCargadas = this.preguntas.length;
+    }
+
+    set usarPreguntasGuardadas(usar){
+        if(usar && !this.usarArchivo){
+            this.preguntas.push(this.preguntasCargadas);
+        }else if(!usar){
+            this.preguntas = this.preguntas.filter(pregunta => !this.preguntasCargadas.includes(pregunta));
+        }
+
+        this.usarArchivo = usar;   
+    }
+
+    cargarPreguntas(archivo){
+        let fs = require('fs');
+        var todasPreguntas = JSON.parse(fs.readFileSync(archivo)).preguntas;
+        if(this.usarPreguntasGuardadas){
+            return todasPreguntas;
+        }
+        var preguntas = [];
+        var numeroPreguntas = Math.floor(Math.random() * (todasPreguntas.length + 1));
+        if(numeroPreguntas == 0){
+            numeroPreguntas = 2;
+        }
+        for(var i = 0; i < numeroPreguntas; i++){
+            var indice = Math.floor(Math.random() * todasPreguntas.length);
+            preguntas.push(todasPreguntas[indice]);
+            todasPreguntas.splice(indice, 1);
+        }
+
+        return preguntas;
     }
 
     addPreguntas(preguntas){
