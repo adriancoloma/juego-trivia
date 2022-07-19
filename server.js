@@ -35,9 +35,12 @@ function onSocketConnect(ws) {
         console.log('Sesion ' + juego.id + ' eliminada');
       }else{
         juego.eliminarJugador(ws);
-        juego.jugadores.forEach((datos, socket) => enviarInformacionJuego(juego, socket));
-        console.log('Jugador ' + ws.nickname + ' eliminado');
+        if(juego.estado == Trivia.estados.esperando_jugadores){
+          juego.jugadores.forEach((datos, socket) => enviarInformacionJuego(juego, socket));
+        }
       }
+
+      console.log('Jugador ' + ws.nickname + ' eliminado');
     }else{
       console.log("El jugador no estaba en ningun juego");
     }
@@ -125,7 +128,9 @@ function manejarMensaje(mensaje, ws){
       break;
     case "iniciar_juego":
       enviarPregunta(json.id_sesion);
-      intervaloActual = setInterval(() => enviarPregunta(json.id_sesion), getJuego(json.id_sesion).tiempoPregunta * 1000);
+      var juego = getJuego(json.id_sesion);
+      intervaloActual = setInterval(() => enviarPregunta(json.id_sesion), juego.tiempoPregunta * 1000);
+      juego.estado = Trivia.estados.jugando;
       break;
 
     case "respuesta":

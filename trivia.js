@@ -1,12 +1,21 @@
+ 
+
 class Trivia{
-    
+    static estados ={
+        "esperando_jugadores" : 0,
+        "jugando" : 1,
+        "finalizado" : 2
+    };
+
     constructor(lider, pwd){
+
         this.password = pwd;
         this.lider = lider;
         this.jugadores = new Map();
         this.preguntaActual = 0;
         this.tiempoPregunta = 10;
         this.maximoPreguntas = 10;
+        this.estado = Trivia.estados.esperando_jugadores;
     }
 
     addPreguntas(preguntas){
@@ -80,7 +89,7 @@ class Trivia{
     }
 
     finalizarJuego(){
-       
+       this.estado = Trivia.estados.finalizado;
         this.jugadores.forEach((_, socket) =>{
             var json = {"tipo" : "finalizar_juego", "puntajes" : []};
             this.jugadores.forEach((datos, socket2) =>{
@@ -110,3 +119,4 @@ class Trivia{
 }
 
 module.exports = Trivia;
+
