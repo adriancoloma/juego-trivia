@@ -71,29 +71,28 @@ function preguntaToElement(pregunta){
     var h1 = document.createElement('h1');
     h1.textContent = pregunta.pregunta;
     divPregunta.appendChild(h1);
-    var tabla = document.createElement('table');
-    tabla.classList.add('table');
+    divPregunta.style.marginBottom = "10px";
+    
     pregunta.opciones.forEach((opcion, i) =>{
-        var row = document.createElement('tr');
-        var tdSpan = document.createElement('td');
-
-        var opcionInput = document.createElement('input');
-        tdSpan.textContent = opcion;
-        tdSpan.style.width = "50%"
-        opcionInput.setAttribute("type", "radio");
-        opcionInput.setAttribute("name", "respuesta");
-        opcionInput.setAttribute("value", i);
+        var divOpcion = document.createElement('div');
+        divOpcion.classList.add("form-check", "my-2", "mx-auto", "text-right", "border");
+        divOpcion.style.width = "500px"
+        divOpcion.style.padding = "0px";
+        var input = document.createElement('input');
+        input.classList.add("form-check-input");
+        input.type = "radio";
+        input.name = "respuesta";
+        input.value = i;
+        input.style.marginLeft = "10px";
+        var label = document.createElement('label');
+        label.classList.add("form-check-label", "float-right");
+        label.textContent = opcion;
         
-        var tdInput = document.createElement('td');
-        tdInput.appendChild(opcionInput);
-        row.appendChild(tdSpan);
-        row.appendChild(tdInput);
-
-        tabla.appendChild(row);
-        //divPregunta.appendChild(document.createElement('br'));
+        divOpcion.appendChild(input);
+        divOpcion.appendChild(label);
+        divPregunta.appendChild(divOpcion);    
     });
 
-    divPregunta.appendChild(tabla);
     return divPregunta;
 }
 
@@ -274,6 +273,7 @@ function mostrarRespuestas(respuestas){
     salida.appendChild(divRespuestas);
     respuestas.forEach(respuesta => {
         var divPregunta = preguntaToElement(respuesta.pregunta);
+        divPregunta.classList.add("border", "border-primary", "p-2");
         divRespuestas.appendChild(divPregunta);
         var respuestaNumero = respuesta.respuesta;
         var inputRespuesta = divPregunta.querySelector('input[value="'+respuestaNumero+'"]');
@@ -284,11 +284,12 @@ function mostrarRespuestas(respuestas){
         }
         );
         
+        var divOpcion = inputRespuesta.parentElement;
         if(respuestaNumero == respuesta.pregunta.respuesta){
-            divPregunta.style.backgroundColor = "aquamarine";
+            divOpcion.style.backgroundColor = "aquamarine";
         }
         else{
-            divPregunta.style.backgroundColor = "rgb(255, 74, 71)";
+            divOpcion.style.backgroundColor = "rgb(255, 74, 71)";
         }
 
         divRespuestas.appendChild(divPregunta);
