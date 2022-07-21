@@ -118,6 +118,7 @@ var divPregunta = document.createElement("div");
 var numPreguntasAdd = 0;
 
 function addPregunta(){
+    divConfiguracion.innerHTML = "";
     if(numPreguntasAdd >= infoJuego.maximo_preguntas){
         alert("Ya no puedes agregar más preguntas");
         return;
@@ -221,6 +222,8 @@ function addPregunta(){
 }
 var divConfiguracion = document.createElement("div");
 function configurarJuego(){
+    divPregunta.innerHTML = "";
+
     divConfiguracion.innerHTML = '';
     divConfiguracion.innerHTML = `<p>Maximo de preguntas a añadir: <input type="number" name="maximo_preguntas" value="${infoJuego.maximo_preguntas.toString()}" min="2"></p><p>Tiempo por pregunta: <input type="number" name="tiempo_pregunta" value="${infoJuego.tiempo_pregunta}" min="1"></p>`;
     var inputUsarPreguntasGuardadas = document.createElement("input");

@@ -87,6 +87,7 @@ function cargarPreguntasArchivo(juego){
 function getJuego(idSesion){
   return juegos[idSesion];
 }
+
 function unirseJuego(jugador, idSesion, pwd, ws){
   var juego = juegos[idSesion];
   if (juego == undefined){
