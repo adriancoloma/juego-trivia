@@ -149,6 +149,16 @@ class Trivia{
         this.jugadores.delete(ws);
     }
 
+    tienePassword(){
+        return this.password != "";
+    }
+
+    getInformacion(){
+        var json = {"tipo" : "datos_juego", "id_sesion" : this.id, "jugadores" : this.getNickJugadores()
+        , "tiempo_pregunta" : this.tiempoPregunta, "maximo_preguntas" : this.maximoPreguntas, "tiene_password" : this.tienePassword()};
+  
+        return json;
+    }
 
 }
 

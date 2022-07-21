@@ -22,25 +22,25 @@
         <h1>TRIVIA</h1>
         <div id="salida" class="border">
             <form id="form_principal" >
-
-                    <div class="campo" id="campo_nick">
-                        <label for="nick">Nick:</label>
-                        <input name="nick" type="text" required>    
-                    </div>
-                    <div class="campo" id="campo_idsesion" style="display:none">
-                        <label id="label_idsesion" for="nick">Id sesión:</label>
-                        <input name="id_sesion" type="text">    
-                    </div>
-                    <div class="campo" id="campo_pwd" style="display:none">
-                        <label id="label_pwd" for="pwd_sesion">Contraseña de sesión:</label>
-                        <input name="pwd_sesion" type="text" required>    
+                    <div id="campos">
+                        <div class="campo" id="campo_nick">
+                            <label for="nick">Nick:</label>
+                            <input name="nick" type="text" required>    
+                        </div>
+                        <div class="campo" id="campo_idsesion" style="display:none">
+                            <label id="label_idsesion" for="nick">Id sesión:</label>
+                            <input name="id_sesion" type="text">    
+                        </div>
+                        <div class="campo" id="campo_pwd" style="display:none">
+                            <label id="label_pwd" for="pwd_sesion">Contraseña de sesión:</label>
+                            <input name="pwd_sesion" type="text" required>    
+                        </div>
                     </div>
                     <div class="my-1 text-center">
                         <button id="btnOk" type="button" class="btn btn-primary w-25 mx-2" style="display:none; max-width: 100px;">OK</button>
                         <button type="button" id="btnCrear" class="btn btn-primary mx-2">Crear juego</button>
                         <button type="button" id="btnUnirse" class="btn btn-primary mx-2">Unirse</button>
                     </div>
-                    
 
             </form>
         </div>

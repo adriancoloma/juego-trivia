@@ -18,8 +18,11 @@ else{
 
 let socket = new WebSocket(url);
 
-setInterval(() => {if(socket.readyState == socket.OPEN) {socket.send('{"tipo" : "ping"}'), 1000}});
+if(location.protocol == "https:"){
+    setInterval(() => {if(socket.readyState == socket.OPEN) {socket.send('{"tipo" : "ping"}'), 1000}});
+}
 
+var sesiones = [];
 var infoJuego = {"id_sesion" : "", "tiempo_pregunta" : 10, "maximo_preguntas" : 10, "nick" : "", "usar_preguntas_guardadas" : true};
 
 function cambiarBotones(){
@@ -27,23 +30,99 @@ function cambiarBotones(){
     btnUnirse.style.display = 'none';
     btnOk.style.display = 'inline';
 }
+
+function crearSelectTipoDeSala(){
+    var selectTipoSala = document.createElement('select');
+    selectTipoSala.classList.add("form-select", "my-2", "mx-auto", "w-25", "border");
+    selectTipoSala.name = "tipo_sala";
+    var option = document.createElement('option');
+    option.value = "publica";
+    option.textContent = "Publica";
+    selectTipoSala.id = "tipo_sala";
+    selectTipoSala.appendChild(option);
+    var option = document.createElement('option');
+    option.value = "privada";
+    option.textContent = "Privada";
+    selectTipoSala.appendChild(option);
+    return selectTipoSala;
+}
+
 function crearJuego(){
     if(campo_nick.lastElementChild.value == ""){
         return;
     }
     campo_nick.style.display = 'none';
-    campoPwd.style.display = 'block';
+    
+    var labelTipoSala = document.createElement('label');
+    labelTipoSala.textContent = "Tipo de sala: ";
+    labelTipoSala.style.marginRight = "10px";
+    labelTipoSala.setAttribute("for", "tipo_sala");
+    var selectTipoSala = crearSelectTipoDeSala();
+    selectTipoSala.style.display = "inline";
+
+    selectTipoSala.onchange = () =>{
+        if(selectTipoSala.value == "privada"){
+            campos.removeChild(campoPwd);
+            campos.appendChild(campoPwd);
+            campoPwd.style.display = 'block';
+        }else{
+            campoPwd.style.display = 'none';
+        }
+    }
+            
+    var campos = document.getElementById("campos");
+    campos.appendChild(labelTipoSala);
+    campos.appendChild(selectTipoSala);
     cambiarBotones();
+}
+
+function mostrarListaSesiones(sesiones){
+    var selectSesion = document.createElement('select');
+    selectSesion.classList.add("form-select", "my-2", "mx-auto", "w-50", "border");
+    selectSesion.name = "id_sesion";
+    selectSesion.id = "id_sesion";
+    var option = document.createElement('option');
+    option.value = "";
+    option.textContent = "Seleccione una sesión";
+    selectSesion.appendChild(option);
+
+    sesiones.forEach(sesion =>{
+        var option = document.createElement('option');
+        option.value = sesion.id_sesion;
+        option.textContent = `Id: ${sesion.id_sesion} - Participantes: ${sesion.jugadores}`;
+        selectSesion.appendChild(option);
+    }
+    )
+
+    selectSesion.onchange = () =>{
+        if(selectSesion.value != ""){
+            var sesionEscogida = sesiones.find(sesion =>{
+                return sesion.id_sesion == selectSesion.value;
+            });
+
+            if(sesionEscogida.tiene_password){
+                campos.removeChild(campoPwd);
+                campos.appendChild(campoPwd);
+                campoPwd.style.display = 'block';
+            }
+            
+        }}
+
+    var campos = document.getElementById("campos");
+    campos.appendChild(selectSesion);
 }
 
 function unirse(){
     if(campo_nick.lastElementChild.value == ""){
         return;
     }
+
+   
     campo_nick.style.display = 'none';
-    campoId.style.display = 'block';
-    campoPwd.style.display = 'block';
+    //campoId.style.display = 'block';
+    //campoPwd.style.display = 'block';
     cambiarBotones();
+    mostrarListaSesiones(sesiones);
 }
 
 function jugadoresToTable(jugadores){
@@ -320,17 +399,18 @@ function mostrarRespuestas(respuestas){
 }
 function handleMessage(evento){
     mensaje = evento.data;
-    //console.log("mensaje recibido " + mensaje);
+    console.log("mensaje recibido " + mensaje);
     var json = JSON.parse(mensaje);
     switch(json.tipo){
         case "datos_juego":
+            console.log("Se recibieron los datos del juego");
+            salida.innerHTML = '';
             var idsesion = document.createElement('h1');
             idsesion.textContent = "Id de sesion: " + json.id_sesion;
             infoJuego.id_sesion = json.id_sesion;
             infoJuego.tiempo_pregunta = json.tiempo_pregunta;
             infoJuego.maximo_preguntas = json.maximo_preguntas;
             
-            salida.innerHTML = '';
             salida.appendChild(idsesion);
             var tableJugadores = jugadoresToTable(json.jugadores);
             salida.appendChild(tableJugadores);
@@ -400,21 +480,26 @@ function handleMessage(evento){
             break;
         case "error_fatal":
             salida.innerHTML = '<h1 class="text-danger">' + json.mensaje + '</h1>';
+            break;
+        case "sesiones":
+            sesiones = json.sesiones;
+            break;
     }
 }
 
+function configurarSocket(){
+    socket.onopen = () =>{socket.send('{"tipo" : "get_sesiones"}');}
+    socket.onmessage = handleMessage;
+    socket.onclose = () =>{salida.innerHTML = '<h1 class="text-danger">Error al conectar al servidor</h1>'}
+}
 
-socket.onmessage = handleMessage;
-socket.onclose = () =>{salida.innerHTML = '<h1 class="text-danger">Error al conectar al servidor</h1>'}
+configurarSocket();
 
 btnCrear.addEventListener('click', crearJuego, false);
 btnUnirse.addEventListener('click', unirse, false);
 
-var form = document.getElementById("btnOk");
 
-
-
-form.onclick = function(){
+btnOk.onclick = function(){
     var formData = new FormData(document.getElementById("form_principal"));
     var jsonData = {"tipo" : "datos_inicio"};
     formData.forEach((value, key) => jsonData[key] = value);
@@ -426,3 +511,5 @@ form.onclick = function(){
     var json = JSON.stringify(jsonData);
     socket.send(json);
 }
+
+

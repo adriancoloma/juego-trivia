@@ -59,11 +59,8 @@ function getJuegoDelJugador(ws){
 }
 
 function enviarInformacionJuego(juego, ws){
-  console.log("id sesion: " + juego.id);
-  var json = {"tipo" : "datos_juego", "id_sesion" : juego.id, "jugadores" : juego.getNickJugadores()
-      , "tiempo_pregunta" : juego.tiempoPregunta, "maximo_preguntas" : juego.maximoPreguntas};
-  
-  var jsonParsed = JSON.stringify(json);
+  var json = juego.getInformacion();
+  jsonParsed = JSON.stringify(json);
   ws.send(jsonParsed);
   console.log("se envio el mensaje " + jsonParsed);
 }
@@ -123,6 +120,7 @@ function enviarPregunta(idSesion){
 
 function manejarMensaje(mensaje, ws){
   const json = JSON.parse(mensaje);
+  console.log("Mensaje recibido " + mensaje);
 
   switch(json.tipo){
     case "datos_inicio":
@@ -160,6 +158,11 @@ function manejarMensaje(mensaje, ws){
       juego.usarPreguntasGuardadas = json.usar_preguntas_guardadas;
 
       juego.jugadores.forEach((datos, socket) => socket.send(JSON.stringify(json)));
+      break;
+    case "get_sesiones":
+      var informacionJuegos = [];
+      juegos.forEach(juego => informacionJuegos.push(juego.getInformacion()));
+      ws.send(JSON.stringify({tipo : "sesiones", sesiones : informacionJuegos}));
       break;
   }
 
