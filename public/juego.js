@@ -87,10 +87,12 @@ function mostrarListaSesiones(sesiones){
     selectSesion.appendChild(option);
 
     sesiones.forEach(sesion =>{
-        var option = document.createElement('option');
-        option.value = sesion.id_sesion;
-        option.textContent = `Id: ${sesion.id_sesion} - Participantes: ${sesion.jugadores}`;
-        selectSesion.appendChild(option);
+        if(sesion.estado == 0){
+            var option = document.createElement('option');
+            option.value = sesion.id_sesion;
+            option.textContent = `Id: ${sesion.id_sesion} - Participantes: ${sesion.jugadores}`;
+            selectSesion.appendChild(option);
+        }
     }
     )
 
