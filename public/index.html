@@ -14,15 +14,21 @@
             margin-right: 10px;
         }
     </style>
+    <link rel="icon" href="icons8-trivial-64.png">
     <!-- CSS only -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
 </head>
 <body>
-    <div class="text-primary text-center">
-        <h1>TRIVIA</h1>
-        <div id="salida" class="border">
+    <div class="text-primary d-flex flex-column" style="height: 100vh">
+        <header class="bg-primary container-fluid d-flex justify-content-center align-items-center p-2 text-white">
+            <img src="icons8-trivial-64.png" alt="Logo">
+            <h1 class="mx-2">TRIVIA</h1>
+            <span>By cadri</span>
+        </header>
+        
+        <div id="salida" class="border container-fluid text-center d-flex justify-content-center align-items-center flex-column" style="flex-grow: 1;">
             <form id="form_principal" >
-                    <div id="campos">
+                    <div id="campos" class="d-flex justify-content-center align-items-center">
                         <div class="campo" id="campo_nick">
                             <label for="nick">Nick:</label>
                             <input name="nick" type="text" required>    
@@ -36,7 +42,7 @@
                             <input name="pwd_sesion" type="text" required>    
                         </div>
                     </div>
-                    <div class="my-1 text-center">
+                    <div class="my-1 d-flex justify-content-center">
                         <button id="btnOk" type="button" class="btn btn-primary w-25 mx-2" style="display:none; max-width: 100px;">OK</button>
                         <button type="button" id="btnCrear" class="btn btn-primary mx-2">Crear juego</button>
                         <button type="button" id="btnUnirse" class="btn btn-primary mx-2">Unirse</button>

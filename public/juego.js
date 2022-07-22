@@ -33,7 +33,7 @@ function cambiarBotones(){
 
 function crearSelectTipoDeSala(){
     var selectTipoSala = document.createElement('select');
-    selectTipoSala.classList.add("form-select", "my-2", "mx-auto", "w-25", "border");
+    selectTipoSala.classList.add("form-select", "my-2", "border");
     selectTipoSala.name = "tipo_sala";
     var option = document.createElement('option');
     option.value = "publica";
@@ -57,6 +57,7 @@ function crearJuego(){
     labelTipoSala.textContent = "Tipo de sala: ";
     labelTipoSala.style.marginRight = "10px";
     labelTipoSala.setAttribute("for", "tipo_sala");
+    labelTipoSala.style.width = "200px";
     var selectTipoSala = crearSelectTipoDeSala();
     selectTipoSala.style.display = "inline";
 
@@ -163,8 +164,7 @@ function preguntaToElement(pregunta){
     
     pregunta.opciones.forEach((opcion, i) =>{
         var divOpcion = document.createElement('div');
-        divOpcion.classList.add("form-check", "my-2", "mx-auto", "text-right", "border");
-        divOpcion.style.width = "500px"
+        divOpcion.classList.add("form-check", "my-2", "mx-auto", "text-right", "border", "w-50");
         divOpcion.style.padding = "0px";
         var input = document.createElement('input');
         input.classList.add("form-check-input");
@@ -204,19 +204,14 @@ function addPregunta(){
         alert("Ya no puedes agregar más preguntas");
         return;
     }
-    divPregunta.innerHTML = 'Pregunta: <input type="text" name="pregunta"><br>Numero de opciones: ';
-    var numPreguntas = document.createElement("input");
-    numPreguntas.type = "number";
-    numPreguntas.name = "num_preguntas";
-
+    divPregunta.innerHTML = '<div class="m-2 row"><span class=col> Pregunta:</span><input class=col type="text" name="pregunta"></div>';
+    var divNumeroOpciones = document.createElement('div');
     var maxOpciones = 5, minOpciones = 2;
-
-    numPreguntas.min = maxOpciones;
-    numPreguntas.max = minOpciones;
-
-    divPregunta.appendChild(numPreguntas);
+    divNumeroOpciones.innerHTML = '<span class=col> Número de opciones:</span> <input class=col type="number" name="numero_opciones" min="2" max="4">';
+    divNumeroOpciones.classList.add("m-2", "row");
+    divPregunta.appendChild(divNumeroOpciones);
     var botonOpciones = document.createElement("button");
-    
+    var numOpciones = divNumeroOpciones.getElementsByTagName("input")[0];
     var botonEnviar = document.createElement("button");
     botonEnviar.classList.add("btn", "btn-primary");
     botonEnviar.textContent = "Enviar pregunta";
@@ -260,14 +255,14 @@ function addPregunta(){
     var divOpciones = document.createElement("div");
 
     botonOpciones.onclick = () =>{
-        if(numPreguntas.value == "" || numPreguntas.valueAsNumber < minOpciones || numPreguntas.valueAsNumber> maxOpciones){
+        if(numOpciones.value == "" || numOpciones.valueAsNumber < minOpciones || numOpciones.valueAsNumber> maxOpciones){
             alert("Numero de opciones invalido");
             return;
         }
 
         divOpciones.innerHTML = "";
 
-        for(var i = 0; i < numPreguntas.valueAsNumber; i++){
+        for(var i = 0; i < numOpciones.valueAsNumber; i++){
             
             divOpciones.appendChild(document.createElement("br"));
             var inputOpcion = document.createElement("input");
@@ -333,7 +328,7 @@ function configurarJuego(){
     salida.appendChild(divConfiguracion);
 }
 
-function mostrarInfoLider(){
+function mostrarInfoLider(salida){
     var botonIniciar = document.createElement('button');
     botonIniciar.classList.add("btn", "btn-primary");
     botonIniciar.onclick = iniciarJuego;
@@ -416,8 +411,10 @@ function handleMessage(evento){
             salida.appendChild(idsesion);
             var tableJugadores = jugadoresToTable(json.jugadores);
             salida.appendChild(tableJugadores);
+            var divBotones = document.createElement('div');
+
             if(soyLider){
-                mostrarInfoLider();
+                mostrarInfoLider(divBotones);
             }else{
                 var esperando = document.createElement('p');
                 esperando.textContent = 'Esperando al lider...';
@@ -432,9 +429,12 @@ function handleMessage(evento){
                 addPregunta();
             };
 
+           
+
             buttonAddPregunta.textContent = "Añadir pregunta";
             buttonAddPregunta.classList.add("m-2");
-            salida.appendChild(buttonAddPregunta);
+            divBotones.appendChild(buttonAddPregunta);
+            salida.appendChild(divBotones);
             break;
 
         case "pregunta":
