@@ -135,7 +135,7 @@ function manejarMensaje(mensaje, ws){
     case "iniciar_juego":
       enviarPregunta(json.id_sesion);
       var juego = getJuego(json.id_sesion);
-      intervaloActual = setInterval(() => frame, juego.tiempoPregunta * 1000);
+      intervaloActual = setInterval(frame, juego.tiempoPregunta * 1000);
       function frame(){
           enviarPregunta(json.id_sesion)
       }
