@@ -394,6 +394,8 @@ function mostrarRespuestas(respuestas){
     
 
 }
+
+var divDatosJuego = document.getElementById("datos_juego");
 function handleMessage(evento){
     mensaje = evento.data;
     console.log("mensaje recibido " + mensaje);
@@ -401,16 +403,16 @@ function handleMessage(evento){
     switch(json.tipo){
         case "datos_juego":
             console.log("Se recibieron los datos del juego");
-            salida.innerHTML = '';
+            divDatosJuego.innerHTML = '';
             var idsesion = document.createElement('h1');
             idsesion.textContent = "Id de sesion: " + json.id_sesion;
             infoJuego.id_sesion = json.id_sesion;
             infoJuego.tiempo_pregunta = json.tiempo_pregunta;
             infoJuego.maximo_preguntas = json.maximo_preguntas;
             
-            salida.appendChild(idsesion);
+            divDatosJuego.appendChild(idsesion);
             var tableJugadores = jugadoresToTable(json.jugadores);
-            salida.appendChild(tableJugadores);
+            divDatosJuego.appendChild(tableJugadores);
             var divBotones = document.createElement('div');
 
             if(soyLider){
@@ -419,7 +421,7 @@ function handleMessage(evento){
                 var esperando = document.createElement('p');
                 esperando.textContent = 'Esperando al lider...';
                 esperando.classList.add("text-info");
-                salida.appendChild(esperando);
+                divDatosJuego.appendChild(esperando);
             }
 
             var buttonAddPregunta = document.createElement("button");
@@ -429,12 +431,10 @@ function handleMessage(evento){
                 addPregunta();
             };
 
-           
-
             buttonAddPregunta.textContent = "Añadir pregunta";
             buttonAddPregunta.classList.add("m-2");
             divBotones.appendChild(buttonAddPregunta);
-            salida.appendChild(divBotones);
+            divDatosJuego.appendChild(divBotones);
             break;
 
         case "pregunta":
@@ -502,7 +502,8 @@ btnUnirse.addEventListener('click', unirse, false);
 
 
 btnOk.onclick = function(){
-    var formData = new FormData(document.getElementById("form_principal"));
+    var form = document.getElementById("form_principal");
+    var formData = new FormData(form);
     var jsonData = {"tipo" : "datos_inicio"};
     formData.forEach((value, key) => jsonData[key] = value);
     if(jsonData.id_sesion == ''){
@@ -512,6 +513,7 @@ btnOk.onclick = function(){
     infoJuego.nick = jsonData.nick;
     var json = JSON.stringify(jsonData);
     socket.send(json);
+    salida.removeChild(form);
 }
 
 
