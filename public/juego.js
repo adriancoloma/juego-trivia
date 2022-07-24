@@ -79,7 +79,7 @@ function crearJuego(){
 
 function mostrarListaSesiones(sesiones){
     var selectSesion = document.createElement('select');
-    selectSesion.classList.add("form-select", "my-2", "mx-auto", "w-50", "border");
+    selectSesion.classList.add("form-select", "my-2", "mx-auto", "w-100", "border");
     selectSesion.name = "id_sesion";
     selectSesion.id = "id_sesion";
     var option = document.createElement('option');
@@ -395,6 +395,10 @@ function mostrarRespuestas(respuestas){
 
 }
 
+function getProgreso(conteo, tiempoMaximo){
+    return (conteo / tiempoMaximo) * 100;
+}
+
 var divDatosJuego = document.getElementById("datos_juego");
 function handleMessage(evento){
     mensaje = evento.data;
@@ -440,12 +444,35 @@ function handleMessage(evento){
         case "pregunta":
             salida.innerHTML = '';
             var contador = infoJuego.tiempo_pregunta;
-            var h1 = document.createElement('h1');
-            h1.textContent = "Tiempo: " + contador;
-            salida.appendChild(h1);
-            setInterval(() => {contador--; h1.textContent = "Tiempo: " + contador;}, 1000);
-            console.log("Se establecio el contador");
-            salida.appendChild(preguntaToElement(json));
+            var divProgreso = document.createElement('div');
+            divProgreso.classList.add("progress", "my-3");
+            divProgreso.style.width = "70%";
+            var divBarra = document.createElement('div');
+            divBarra.classList.add("progress-bar", "bg-success");
+            divBarra.style.width = "100%";
+            divProgreso.appendChild(divBarra);
+            salida.appendChild(divProgreso);
+            var timer = setInterval(frame, 1000);
+
+            function frame(){
+                if(contador == 0){
+                    clearInterval(timer);
+                    return;
+                }
+
+                contador--; 
+                var progreso = getProgreso(contador, infoJuego.tiempo_pregunta);
+                divBarra.style.width = progreso+ "%";
+                if(progreso < 25){
+                    divBarra.classList.replace("bg-warning", "bg-danger");
+                }else if(progreso < 60){
+                    divBarra.classList.replace("bg-success", "bg-warning");
+                }
+
+            }
+            //console.log("Se establecio el contador");
+            var preguntaElement = preguntaToElement(json);
+            salida.appendChild(preguntaElement);
             var botonEnviar = document.createElement('button');
             botonEnviar.textContent = "Enviar";
             botonEnviar.classList.add("btn", "btn-primary")
@@ -454,6 +481,17 @@ function handleMessage(evento){
                 var jsonEnviar = {"tipo" : "respuesta", "numero_pregunta" : json.numero_pregunta, "id_sesion" : infoJuego.id_sesion, "respuesta" : respuesta.value};
                 socket.send(JSON.stringify(jsonEnviar));
                 botonEnviar.style.display = "none";
+
+                var radios = preguntaElement.querySelectorAll('input[type="radio"]');
+                radios.forEach(radio => {
+                    radio.disabled = true;
+                }
+                );
+
+                var respuestaEnviada = document.createElement('p');
+                respuestaEnviada.textContent = "Respuesta enviada";
+                respuestaEnviada.classList.add("text-info");
+                salida.appendChild(respuestaEnviada);
             }
 
             salida.appendChild(botonEnviar);
