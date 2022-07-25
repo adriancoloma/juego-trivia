@@ -443,34 +443,17 @@ function handleMessage(evento){
 
         case "pregunta":
             salida.innerHTML = '';
-            var contador = infoJuego.tiempo_pregunta;
+            //var contador = infoJuego.tiempo_pregunta;
             var divProgreso = document.createElement('div');
             divProgreso.classList.add("progress", "my-3");
             divProgreso.style.width = "70%";
             var divBarra = document.createElement('div');
-            divBarra.classList.add("progress-bar", "bg-success");
-            divBarra.style.width = "100%";
+            divBarra.classList.add("progress-bar");
+            divBarra.style.width = "0%";
+            divBarra.id = "barra";
+            divBarra.style.animationDuration = infoJuego.tiempo_pregunta + "s";
             divProgreso.appendChild(divBarra);
             salida.appendChild(divProgreso);
-            var timer = setInterval(frame, 1000);
-
-            function frame(){
-                if(contador == 0){
-                    clearInterval(timer);
-                    return;
-                }
-
-                contador--; 
-                var progreso = getProgreso(contador, infoJuego.tiempo_pregunta);
-                divBarra.style.width = progreso+ "%";
-                if(progreso < 25){
-                    divBarra.classList.replace("bg-warning", "bg-danger");
-                }else if(progreso < 60){
-                    divBarra.classList.replace("bg-success", "bg-warning");
-                }
-
-            }
-            //console.log("Se establecio el contador");
             var preguntaElement = preguntaToElement(json);
             salida.appendChild(preguntaElement);
             var botonEnviar = document.createElement('button');

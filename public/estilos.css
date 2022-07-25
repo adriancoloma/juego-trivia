@@ -1,0 +1,19 @@
+@keyframes barra-timer{
+    0%{
+        width: 100%;
+        background-color: greenyellow;
+    }
+    75%{
+        background-color: yellow;
+    }
+    100%{
+        width: 0%;
+        background-color: red;
+    }
+}
+
+#barra{
+    animation-name: barra-timer;
+    animation-timing-function: linear;
+    animation-play-state: running;
+}
