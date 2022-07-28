@@ -402,7 +402,7 @@ function getProgreso(conteo, tiempoMaximo){
 var divDatosJuego = document.getElementById("datos_juego");
 function handleMessage(evento){
     mensaje = evento.data;
-    console.log("mensaje recibido " + mensaje);
+    //console.log("mensaje recibido " + mensaje);
     var json = JSON.parse(mensaje);
     switch(json.tipo){
         case "datos_juego":
@@ -480,7 +480,7 @@ function handleMessage(evento){
             salida.appendChild(botonEnviar);
             break;
         case "finalizar_juego":
-            salida.innerHTML = '';
+            salida.innerHTML = '<p class="text-info">El juego ha finalizado</p>';
             mostrarResultados(json);
             var nicks = [];
             json.respuestas.forEach(respuesta => {

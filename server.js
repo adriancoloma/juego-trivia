@@ -107,16 +107,20 @@ var intervaloActual;
 function enviarPregunta(idSesion){
   var juego = juegos[idSesion];
   var nPregunta = juego.preguntaActual;
-  var json = juego.getSigPregunta();
-  if(json == null){
+  var preguntaActual = juego.getSigPregunta();
+  
+  if(preguntaActual == null){
     console.log("La pregunta fue null");
     clearInterval(intervaloActual);
     juego.finalizarJuego();
     return;
   }
 
+  var json = Object.assign({}, preguntaActual);
+  delete json.respuesta;
   json.tipo = "pregunta";
   json.numero_pregunta = nPregunta;
+  console.log("Pregunta enviada :" + JSON.stringify(json));
   juego.jugadores.forEach((datos, socket) => socket.send(JSON.stringify(json))); 
 }
 
