@@ -155,7 +155,7 @@ function iniciarJuego(){
     socket.send(JSON.stringify({"tipo" : "iniciar_juego", "id_sesion" : infoJuego.id_sesion}));
 }
 
-function preguntaToElement(pregunta){
+function preguntaToElement(pregunta, name){
     var divPregunta = document.createElement('div');
     var h1 = document.createElement('h1');
     h1.textContent = pregunta.pregunta;
@@ -169,7 +169,7 @@ function preguntaToElement(pregunta){
         var input = document.createElement('input');
         input.classList.add("form-check-input");
         input.type = "radio";
-        input.name = "respuesta";
+        input.name = name;
         input.value = i;
         input.style.marginLeft = "10px";
         var label = document.createElement('label');
@@ -366,8 +366,8 @@ function mostrarRespuestas(respuestas){
     divRespuestas.innerHTML = '';
     divRespuestas.innerHTML = '<p>Respuestas:</p>';
     salida.appendChild(divRespuestas);
-    respuestas.forEach(respuesta => {
-        var divPregunta = preguntaToElement(respuesta.pregunta);
+    respuestas.forEach((respuesta, i) => {
+        var divPregunta = preguntaToElement(respuesta.pregunta, "respuesta" + i);
         divPregunta.classList.add("border", "border-primary", "p-2");
         divRespuestas.appendChild(divPregunta);
         var respuestaNumero = respuesta.respuesta;
@@ -454,7 +454,7 @@ function handleMessage(evento){
             divBarra.style.animationDuration = infoJuego.tiempo_pregunta + "s";
             divProgreso.appendChild(divBarra);
             salida.appendChild(divProgreso);
-            var preguntaElement = preguntaToElement(json);
+            var preguntaElement = preguntaToElement(json, "respuesta");
             salida.appendChild(preguntaElement);
             var botonEnviar = document.createElement('button');
             botonEnviar.textContent = "Enviar";
