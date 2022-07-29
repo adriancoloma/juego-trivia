@@ -125,21 +125,18 @@ class Trivia{
 
     finalizarJuego(){
         clearInterval(this.intervaloActual);
-       this.estado = Trivia.estados.finalizado;
-        this.jugadores.forEach((_, socket) =>{
-            var json = {"tipo" : "finalizar_juego", "puntajes" : []};
-            this.jugadores.forEach((datos, socket2) =>{
-                if(socket == socket2){
-                    json["mi_puntaje"]= datos.puntaje;
-                }else{
-                    json.puntajes.push({"nick" : datos.nick, "puntaje" : datos.puntaje});
-                }
-            })
+        this.estado = Trivia.estados.finalizado;
+        var json = {"tipo" : "finalizar_juego", "puntajes" : []};
+        this.jugadores.forEach((datos, _) => {
+            json.puntajes.push({ "nick": datos.nick, "puntaje": datos.puntaje });
+        })
 
+        json.puntajes.sort((a, b) => b.puntaje - a.puntaje);
+        this.jugadores.forEach((datos, socket) => {
             json.respuestas = this.getRespuestas();
             socket.send(JSON.stringify(json));
-
-        })
+        }
+        )
     }
 
     esLider(ws){

@@ -185,15 +185,30 @@ function preguntaToElement(pregunta, name){
 }
 
 function mostrarResultados(json){
-    var miPuntaje = document.createElement('h1');
-    miPuntaje.textContent = "Mi puntaje: " + json.mi_puntaje;
-    salida.appendChild(miPuntaje);
+    var divResultados = document.createElement('div');
+    divResultados.classList.add("container");
+    divResultados.style.marginTop = "10px";
+    divResultados.style.marginBottom = "10px";
+    divResultados.style.border = "1px solid black";
+    divResultados.style.padding = "10px";
+    divResultados.style.backgroundColor = "white";
+    divResultados.style.borderRadius = "10px";
+    divResultados.style.width = "50%";
+    var h1Resultados = document.createElement('h1');
+    h1Resultados.textContent = "Resultados";
+    h1Resultados.classList.add("text-primary");
+    divResultados.appendChild(h1Resultados);
+    var olPuntajes = document.createElement('ol');
+    olPuntajes.classList.add("list-group", "list-group-numbered");
     json.puntajes.forEach(puntajeObj =>{
-        var h2 = document.createElement('h2');
-        h2.textContent = puntajeObj.nick + ": " + puntajeObj.puntaje;
-        salida.appendChild(h2);
+        var puntaje = document.createElement('li');
+        puntaje.classList.add("list-group-item");
+        puntaje.textContent = `${puntajeObj.nick}: ${puntajeObj.puntaje} puntos`;
+        olPuntajes.appendChild(puntaje);
     });
-    
+
+    divResultados.appendChild(olPuntajes);
+    salida.appendChild(divResultados);
 }
 var divPregunta = document.createElement("div");
 var numPreguntasAdd = 0;
@@ -383,18 +398,25 @@ function mostrarRespuestas(respuestas){
         );
         
         var divOpcion = inputRespuesta.parentElement;
-        if(respuestaNumero == respuesta.pregunta.respuesta){
+        var esCorrecta = respuestaNumero == respuesta.pregunta.respuesta;
+
+        var pPuntos = document.createElement("p");
+        pPuntos.classList.add("text-danger");
+        var puntos;
+        if(esCorrecta){
             divOpcion.style.backgroundColor = "aquamarine";
+            puntos = infoJuego.tiempo_pregunta - respuesta.tiempo + 1; 
         }
         else{
             divOpcion.style.backgroundColor = "rgb(255, 74, 71)";
+            puntos = 0;
         }
 
+        
+        pPuntos.textContent = "Puntos: " + puntos;
+        divPregunta.appendChild(pPuntos);
         divRespuestas.appendChild(divPregunta);
     })
-
-
-    
 
 }
 
@@ -483,7 +505,7 @@ function handleMessage(evento){
             salida.appendChild(botonEnviar);
             break;
         case "finalizar_juego":
-            salida.innerHTML = '<p class="text-info">El juego ha finalizado</p>';
+            salida.innerHTML = '<p class="text-info my-2">El juego ha finalizado</p>';
             mostrarResultados(json);
             var nicks = [];
             json.respuestas.forEach(respuesta => {
