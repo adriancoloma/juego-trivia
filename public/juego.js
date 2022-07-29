@@ -369,7 +369,10 @@ function mostrarRespuestas(respuestas){
     respuestas.forEach((respuesta, i) => {
         var divPregunta = preguntaToElement(respuesta.pregunta, "respuesta" + i);
         divPregunta.classList.add("border", "border-primary", "p-2");
-        divRespuestas.appendChild(divPregunta);
+        var pTiempo = document.createElement("p");
+        pTiempo.classList.add("text-primary");
+        pTiempo.textContent = "Tiempo: " + respuesta.tiempo + " s";
+        divPregunta.firstChild.before(pTiempo);
         var respuestaNumero = respuesta.respuesta;
         var inputRespuesta = divPregunta.querySelector('input[value="'+respuestaNumero+'"]');
         inputRespuesta.checked = true; //Marcamos la opcion correcta

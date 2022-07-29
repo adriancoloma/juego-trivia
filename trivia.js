@@ -20,6 +20,7 @@ class Trivia{
         this.preguntas = this.cargarPreguntas("preguntas.json");
         this.preguntasCargadas = this.preguntas;
         this.numeroPreguntasCargadas = this.preguntas.length;
+        this.conteoActual = 0;
     }
 
     set usarPreguntasGuardadas(usar){
@@ -75,7 +76,7 @@ class Trivia{
             this.addPunto(ws);
         }
 
-        this.jugadores.get(ws).respuestas.push({"pregunta" : this.preguntas[numeroPregunta], "respuesta" : respuesta});
+        this.jugadores.get(ws).respuestas.push({"pregunta" : this.preguntas[numeroPregunta], "respuesta" : respuesta, "tiempo" : this.conteoActual});
     }
 
     getRespuestas(){
@@ -99,7 +100,7 @@ class Trivia{
     }
 
     addPunto(ws){
-        this.jugadores.get(ws).puntaje++;
+        this.jugadores.get(ws).puntaje += this.tiempoPregunta - this.conteoActual + 1;
     }
 
     validarPassword(pwd){
@@ -123,6 +124,7 @@ class Trivia{
     }
 
     finalizarJuego(){
+        clearInterval(this.intervaloActual);
        this.estado = Trivia.estados.finalizado;
         this.jugadores.forEach((_, socket) =>{
             var json = {"tipo" : "finalizar_juego", "puntajes" : []};
@@ -159,6 +161,19 @@ class Trivia{
         "estado" : this.estado};
   
         return json;
+    }
+
+    iniciarTimer(accion){
+        this.intervaloActual = setInterval(
+            () =>{
+                console.log("conteo " + this.conteoActual);
+                this.conteoActual++;
+                if(this.conteoActual == this.tiempoPregunta){
+                    this.conteoActual = 0;
+                    accion();
+                    console.log("se ejecuto accion");
+                }
+            }, 1000);
     }
 
 }
