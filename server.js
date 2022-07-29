@@ -35,6 +35,7 @@ function onSocketConnect(ws) {
         clearInterval(juego.intervaloActual); 
         delete juego;  
         console.log('Sesion ' + juego.id + ' eliminada');
+        clients.forEach(client => enviarSesiones(client));
       }else{
         juego.eliminarJugador(ws);
         if(juego.estado == Trivia.estados.esperando_jugadores){
@@ -75,6 +76,7 @@ function crearJuego(lider, pwd, ws){
   //cargarPreguntasArchivo(nuevoJuego);
 
   enviarInformacionJuego(nuevoJuego, ws);
+  clients.forEach(client => enviarSesiones(client));
 }
 
 function cargarPreguntasArchivo(juego){
@@ -124,6 +126,12 @@ function enviarPregunta(idSesion){
   juego.jugadores.forEach((datos, socket) => socket.send(JSON.stringify(json))); 
 }
 
+function enviarSesiones(ws){
+  var informacionJuegos = [];
+  juegos.forEach(juego => informacionJuegos.push(juego.getInformacion()));
+  ws.send(JSON.stringify({tipo : "sesiones", sesiones : informacionJuegos}));
+}
+
 function manejarMensaje(mensaje, ws){
   const json = JSON.parse(mensaje);
   console.log("Mensaje recibido " + mensaje);
@@ -167,9 +175,7 @@ function manejarMensaje(mensaje, ws){
       juego.jugadores.forEach((datos, socket) => socket.send(JSON.stringify(json)));
       break;
     case "get_sesiones":
-      var informacionJuegos = [];
-      juegos.forEach(juego => informacionJuegos.push(juego.getInformacion()));
-      ws.send(JSON.stringify({tipo : "sesiones", sesiones : informacionJuegos}));
+      enviarSesiones(ws);
       break;
   }
 

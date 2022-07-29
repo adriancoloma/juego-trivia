@@ -23,7 +23,7 @@ if(location.protocol == "https:"){
 }
 
 var sesiones = [];
-var infoJuego = {"id_sesion" : "", "tiempo_pregunta" : 10, "maximo_preguntas" : 10, "nick" : "", "usar_preguntas_guardadas" : true};
+var infoJuego = {"estado": "nick", "id_sesion" : "", "tiempo_pregunta" : 10, "maximo_preguntas" : 10, "nick" : "", "usar_preguntas_guardadas" : true};
 
 function cambiarBotones(){
     btnCrear.style.display = 'none';
@@ -78,6 +78,11 @@ function crearJuego(){
 }
 
 function mostrarListaSesiones(sesiones){
+    var selectActual = document.getElementById("id_sesion");
+    if(selectActual != null){
+        selectActual.remove();
+    }
+    
     var selectSesion = document.createElement('select');
     selectSesion.classList.add("form-select", "my-2", "mx-auto", "w-100", "border");
     selectSesion.name = "id_sesion";
@@ -115,6 +120,10 @@ function mostrarListaSesiones(sesiones){
     campos.appendChild(selectSesion);
 }
 
+function solicitarSesiones(){
+    socket.send('{"tipo" : "get_sesiones"}');
+}
+
 function unirse(){
     if(campo_nick.lastElementChild.value == ""){
         return;
@@ -125,7 +134,8 @@ function unirse(){
     //campoId.style.display = 'block';
     //campoPwd.style.display = 'block';
     cambiarBotones();
-    mostrarListaSesiones(sesiones);
+    infoJuego.estado = "seleccion_sesion";
+    solicitarSesiones();
 }
 
 function jugadoresToTable(jugadores){
@@ -464,6 +474,8 @@ function handleMessage(evento){
             buttonAddPregunta.classList.add("m-2");
             divBotones.appendChild(buttonAddPregunta);
             divDatosJuego.appendChild(divBotones);
+
+            infoJuego.estado = "en_espera";
             break;
 
         case "pregunta":
@@ -531,12 +543,14 @@ function handleMessage(evento){
             break;
         case "sesiones":
             sesiones = json.sesiones;
+            if(infoJuego.estado = "seleccion_sesion"){
+                mostrarListaSesiones(sesiones);
+            }
             break;
     }
 }
 
 function configurarSocket(){
-    socket.onopen = () =>{socket.send('{"tipo" : "get_sesiones"}');}
     socket.onmessage = handleMessage;
     socket.onclose = () =>{salida.innerHTML = '<h1 class="text-danger">Error al conectar al servidor</h1>'}
 }
