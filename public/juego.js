@@ -9,18 +9,30 @@ var campoPwd = document.getElementById("campo_pwd");
 var soyLider = false;
 var salida = document.querySelector('#salida');
 
-if(location.protocol == "http:"){
-    var url = "ws://" + location.host + "/ws";
-}
-else{
-    var url = "wss://" + location.host + "/ws";
+var socket;
+function init(){
+    if(location.protocol == "http:"){
+        var url = "ws://" + location.host + "/ws";
+    }
+    else{
+        var url = "wss://" + location.host + "/ws";
+    }
+    
+    socket = new WebSocket(url);
+    
+    if(location.protocol == "https:"){
+        setInterval(() => {if(socket.readyState == socket.OPEN) {socket.send('{"tipo" : "ping"}'), 1000}});
+    }
+
+    window.onbeforeunload = evt =>{
+        var mensaje = "Estas seguro de que quieres salir? Abandonaras la partida actual.";
+        evt.returnValue = mensaje;
+        return mensaje;
+    }
+
 }
 
-let socket = new WebSocket(url);
-
-if(location.protocol == "https:"){
-    setInterval(() => {if(socket.readyState == socket.OPEN) {socket.send('{"tipo" : "ping"}'), 1000}});
-}
+init();
 
 var sesiones = [];
 var infoJuego = {"estado": "nick", "id_sesion" : "", "tiempo_pregunta" : 10, "maximo_preguntas" : 10, "nick" : "", "usar_preguntas_guardadas" : true};
