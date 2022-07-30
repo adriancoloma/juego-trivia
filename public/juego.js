@@ -543,7 +543,7 @@ function handleMessage(evento){
             break;
         case "sesiones":
             sesiones = json.sesiones;
-            if(infoJuego.estado = "seleccion_sesion"){
+            if(infoJuego.estado == "seleccion_sesion"){
                 mostrarListaSesiones(sesiones);
             }
             break;

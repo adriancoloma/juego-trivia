@@ -68,11 +68,14 @@ function enviarInformacionJuego(juego, ws){
   console.log("se envio el mensaje " + jsonParsed);
 }
 
+var idSesionActual = 0;
+
 function crearJuego(lider, pwd, ws){
   var nuevoJuego = new Trivia(lider, pwd);
   nuevoJuego.addJugador(lider, ws);
   var idSesion = juegos.push(nuevoJuego) - 1;
-  nuevoJuego.id = idSesion;
+  nuevoJuego.id = idSesionActual;
+  idSesionActual++;
   //cargarPreguntasArchivo(nuevoJuego);
 
   enviarInformacionJuego(nuevoJuego, ws);
@@ -86,11 +89,11 @@ function cargarPreguntasArchivo(juego){
 }
 
 function getJuego(idSesion){
-  return juegos[idSesion];
+  return juegos.find(juego => juego.id == idSesion);
 }
 
 function unirseJuego(jugador, idSesion, pwd, ws){
-  var juego = juegos[idSesion];
+  var juego = getJuego(idSesion);
   if (juego == undefined){
     ws.send(JSON.stringify({tipo : "error", mensaje : "No existe la sesion"}));
     return;
@@ -107,7 +110,7 @@ function unirseJuego(jugador, idSesion, pwd, ws){
 
 var intervaloActual;
 function enviarPregunta(idSesion){
-  var juego = juegos[idSesion];
+  var juego = getJuego(idSesion);
   var nPregunta = juego.preguntaActual;
   var preguntaActual = juego.getSigPregunta();
   
@@ -153,7 +156,7 @@ function manejarMensaje(mensaje, ws){
       break;
 
     case "respuesta":
-      var juego = juegos[json.id_sesion];
+      var juego = getJuego(json.id_sesion);
 
       juego.responder(ws, json.numero_pregunta, json.respuesta);
       break;
