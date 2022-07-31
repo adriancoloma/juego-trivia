@@ -1,4 +1,6 @@
 
+import { GameManager } from "./game_manager.js";
+import {preguntaToElement, mostrarListaSesiones, mostrarInfoLider, crearSelectNick, crearSelectTipoDeSala, jugadoresToTable, Renderizador} from "./render.js";
 var btnCrear = document.getElementById('btnCrear');
 var btnUnirse = document.getElementById('btnUnirse');
 var btnOk = document.getElementById('btnOk');
@@ -8,8 +10,12 @@ var campoPwd = document.getElementById("campo_pwd");
 
 var soyLider = false;
 var salida = document.querySelector('#salida');
+var divRespuestas = document.createElement("div");
 
 var socket;
+var gm = new GameManager();
+var render = new Renderizador(salida, divRespuestas, gm.infoJuego);
+
 function init(){
     if(location.protocol == "http:"){
         var url = "ws://" + location.host + "/ws";
@@ -34,8 +40,6 @@ function init(){
 
 init();
 
-var sesiones = [];
-var infoJuego = {"estado": "nick", "id_sesion" : "", "tiempo_pregunta" : 10, "maximo_preguntas" : 10, "nick" : "", "usar_preguntas_guardadas" : true};
 
 function cambiarBotones(){
     btnCrear.style.display = 'none';
@@ -43,21 +47,7 @@ function cambiarBotones(){
     btnOk.style.display = 'inline';
 }
 
-function crearSelectTipoDeSala(){
-    var selectTipoSala = document.createElement('select');
-    selectTipoSala.classList.add("form-select", "my-2", "border");
-    selectTipoSala.name = "tipo_sala";
-    var option = document.createElement('option');
-    option.value = "publica";
-    option.textContent = "Publica";
-    selectTipoSala.id = "tipo_sala";
-    selectTipoSala.appendChild(option);
-    var option = document.createElement('option');
-    option.value = "privada";
-    option.textContent = "Privada";
-    selectTipoSala.appendChild(option);
-    return selectTipoSala;
-}
+
 
 function crearJuego(){
     if(campo_nick.lastElementChild.value == ""){
@@ -89,49 +79,6 @@ function crearJuego(){
     cambiarBotones();
 }
 
-function mostrarListaSesiones(sesiones){
-    var selectActual = document.getElementById("id_sesion");
-    if(selectActual != null){
-        selectActual.remove();
-    }
-    
-    var selectSesion = document.createElement('select');
-    selectSesion.classList.add("form-select", "my-2", "mx-auto", "w-100", "border");
-    selectSesion.name = "id_sesion";
-    selectSesion.id = "id_sesion";
-    var option = document.createElement('option');
-    option.value = "";
-    option.textContent = "Seleccione una sesión";
-    selectSesion.appendChild(option);
-
-    sesiones.forEach(sesion =>{
-        if(sesion.estado == 0){
-            var option = document.createElement('option');
-            option.value = sesion.id_sesion;
-            option.textContent = `Id: ${sesion.id_sesion} - Participantes: ${sesion.jugadores}`;
-            selectSesion.appendChild(option);
-        }
-    }
-    )
-
-    selectSesion.onchange = () =>{
-        if(selectSesion.value != ""){
-            var sesionEscogida = sesiones.find(sesion =>{
-                return sesion.id_sesion == selectSesion.value;
-            });
-
-            if(sesionEscogida.tiene_password){
-                campos.removeChild(campoPwd);
-                campos.appendChild(campoPwd);
-                campoPwd.style.display = 'block';
-            }
-            
-        }}
-
-    var campos = document.getElementById("campos");
-    campos.appendChild(selectSesion);
-}
-
 function solicitarSesiones(){
     socket.send('{"tipo" : "get_sesiones"}');
 }
@@ -146,98 +93,24 @@ function unirse(){
     //campoId.style.display = 'block';
     //campoPwd.style.display = 'block';
     cambiarBotones();
-    infoJuego.estado = "seleccion_sesion";
+    gm.infoJuego.estado = "seleccion_sesion";
     solicitarSesiones();
-}
-
-function jugadoresToTable(jugadores){
-    var table = document.createElement('table');
-    table.classList.add('table');
-    var tr = document.createElement('tr');
-    var th = document.createElement('th');
-    th.textContent = "Jugadores"
-    tr.appendChild(th);
-    table.appendChild(tr);
-
-    jugadores.forEach(jugador =>{
-        var tr = document.createElement('tr');
-        var td = document.createElement('td');
-        td.textContent = jugador;
-        tr.appendChild(td);
-
-        table.appendChild(tr);
-    })
-
-    return table;
 }
 
 var id_sesion;
 
 function iniciarJuego(){
-    socket.send(JSON.stringify({"tipo" : "iniciar_juego", "id_sesion" : infoJuego.id_sesion}));
+    socket.send(JSON.stringify({"tipo" : "iniciar_juego", "id_sesion" : gm.infoJuego.id_sesion}));
 }
 
-function preguntaToElement(pregunta, name){
-    var divPregunta = document.createElement('div');
-    var h1 = document.createElement('h1');
-    h1.textContent = pregunta.pregunta;
-    divPregunta.appendChild(h1);
-    divPregunta.style.marginBottom = "10px";
-    
-    pregunta.opciones.forEach((opcion, i) =>{
-        var divOpcion = document.createElement('div');
-        divOpcion.classList.add("form-check", "my-2", "mx-auto", "text-right", "border", "w-50");
-        divOpcion.style.padding = "0px";
-        var input = document.createElement('input');
-        input.classList.add("form-check-input");
-        input.type = "radio";
-        input.name = name;
-        input.value = i;
-        input.style.marginLeft = "10px";
-        var label = document.createElement('label');
-        label.classList.add("form-check-label", "float-right");
-        label.textContent = opcion;
-        
-        divOpcion.appendChild(input);
-        divOpcion.appendChild(label);
-        divPregunta.appendChild(divOpcion);    
-    });
 
-    return divPregunta;
-}
 
-function mostrarResultados(json){
-    var divResultados = document.createElement('div');
-    divResultados.classList.add("container");
-    divResultados.style.marginTop = "10px";
-    divResultados.style.marginBottom = "10px";
-    divResultados.style.border = "1px solid black";
-    divResultados.style.padding = "10px";
-    divResultados.style.backgroundColor = "white";
-    divResultados.style.borderRadius = "10px";
-    divResultados.style.width = "50%";
-    var h1Resultados = document.createElement('h1');
-    h1Resultados.textContent = "Resultados";
-    h1Resultados.classList.add("text-primary");
-    divResultados.appendChild(h1Resultados);
-    var olPuntajes = document.createElement('ol');
-    olPuntajes.classList.add("list-group", "list-group-numbered");
-    json.puntajes.forEach(puntajeObj =>{
-        var puntaje = document.createElement('li');
-        puntaje.classList.add("list-group-item");
-        puntaje.textContent = `${puntajeObj.nick}: ${puntajeObj.puntaje} puntos`;
-        olPuntajes.appendChild(puntaje);
-    });
-
-    divResultados.appendChild(olPuntajes);
-    salida.appendChild(divResultados);
-}
 var divPregunta = document.createElement("div");
 var numPreguntasAdd = 0;
 
 function addPregunta(){
     divConfiguracion.innerHTML = "";
-    if(numPreguntasAdd >= infoJuego.maximo_preguntas){
+    if(numPreguntasAdd >= gm.infoJuego.maximo_preguntas){
         alert("Ya no puedes agregar más preguntas");
         return;
     }
@@ -281,7 +154,7 @@ function addPregunta(){
         }
 
         var preguntaObj = {"pregunta" : preguntaInput.value, "opciones" : opciones, "respuesta" : parseInt(opcionCorrecta.value)};
-        var json = {"tipo" : "pregunta", "id_sesion" : infoJuego.id_sesion, "pregunta" : preguntaObj};
+        var json = {"tipo" : "pregunta", "id_sesion" : gm.infoJuego.id_sesion, "pregunta" : preguntaObj};
 
         socket.send(JSON.stringify(json));
         divPregunta.innerHTML = '<p class="text-sucess">Pregunta añadida</p>'
@@ -334,15 +207,16 @@ function addPregunta(){
 
 }
 var divConfiguracion = document.createElement("div");
+
 function configurarJuego(){
     divPregunta.innerHTML = "";
 
     divConfiguracion.innerHTML = '';
-    divConfiguracion.innerHTML = `<p>Maximo de preguntas a añadir: <input type="number" name="maximo_preguntas" value="${infoJuego.maximo_preguntas.toString()}" min="2"></p><p>Tiempo por pregunta: <input type="number" name="tiempo_pregunta" value="${infoJuego.tiempo_pregunta}" min="1"></p>`;
+    divConfiguracion.innerHTML = `<p>Maximo de preguntas a añadir: <input type="number" name="maximo_preguntas" value="${gm.infoJuego.maximo_preguntas.toString()}" min="2"></p><p>Tiempo por pregunta: <input type="number" name="tiempo_pregunta" value="${gm.infoJuego.tiempo_pregunta}" min="1"></p>`;
     var inputUsarPreguntasGuardadas = document.createElement("input");
     inputUsarPreguntasGuardadas.type = "checkbox";
     inputUsarPreguntasGuardadas.name = "usar_preguntas_guardadas";
-    inputUsarPreguntasGuardadas.checked = infoJuego.usar_preguntas_guardadas;
+    inputUsarPreguntasGuardadas.checked = gm.infoJuego.usar_preguntas_guardadas;
     var pUsarPreguntas = document.createElement("p");
     pUsarPreguntas.innerHTML = "Usar preguntas guardadas: ";
     pUsarPreguntas.appendChild(inputUsarPreguntasGuardadas);
@@ -352,7 +226,7 @@ function configurarJuego(){
     botonConfigurar.textContent = "Guardar configuracion";
 
     botonConfigurar.onclick = () =>{
-        var json = {"tipo" : "configurar_juego", "id_sesion" : infoJuego.id_sesion, 
+        var json = {"tipo" : "configurar_juego", "id_sesion" : gm.infoJuego.id_sesion, 
         "tiempo_pregunta" : document.querySelector('input[name="tiempo_pregunta"]').valueAsNumber, 
         "maximo_preguntas" : document.querySelector('input[name="maximo_preguntas"]').value,
         "usar_preguntas_guardadas" : inputUsarPreguntasGuardadas.checked};
@@ -364,91 +238,13 @@ function configurarJuego(){
     divConfiguracion.appendChild(botonConfigurar);
     salida.appendChild(divConfiguracion);
 }
-
-function mostrarInfoLider(salida){
-    var botonIniciar = document.createElement('button');
-    botonIniciar.classList.add("btn", "btn-primary");
-    botonIniciar.onclick = iniciarJuego;
-    botonIniciar.textContent = "Iniciar juego";
-    botonIniciar.classList.add("m-2");
-    salida.appendChild(botonIniciar);
-
-    var botonConfigurar = document.createElement('button');
-    botonConfigurar.classList.add("btn", "btn-primary");
-    botonConfigurar.textContent = "Configurar juego";
-    botonConfigurar.onclick = configurarJuego;
-    botonConfigurar.classList.add("m-2");
-    salida.appendChild(botonConfigurar);
-}
-
-var divRespuestas = document.createElement("div");
-
-function crearSelectNick(nicks){
-    var select = document.createElement("select");
-    select.classList.add("m-2");
-    select.name = "nick";
-    nicks.forEach(nick => {
-        var option = document.createElement("option");
-        option.value = nick;
-        option.textContent = nick;
-        select.appendChild(option);
-    }
-    );
-    
-    return select;
-}
-
-
-function mostrarRespuestas(respuestas){
-    divRespuestas.innerHTML = '';
-    divRespuestas.innerHTML = '<p>Respuestas:</p>';
-    salida.appendChild(divRespuestas);
-    respuestas.forEach((respuesta, i) => {
-        var divPregunta = preguntaToElement(respuesta.pregunta, "respuesta" + i);
-        divPregunta.classList.add("border", "border-primary", "p-2");
-        var pTiempo = document.createElement("p");
-        pTiempo.classList.add("text-primary");
-        pTiempo.textContent = "Tiempo: " + respuesta.tiempo + " s";
-        divPregunta.firstChild.before(pTiempo);
-        var respuestaNumero = respuesta.respuesta;
-        var inputRespuesta = divPregunta.querySelector('input[value="'+respuestaNumero+'"]');
-        inputRespuesta.checked = true; //Marcamos la opcion correcta
-        var inputsRespuesta = divPregunta.querySelectorAll('input[type="radio"]');
-        inputsRespuesta.forEach(input => {
-            input.disabled = true;
-        }
-        );
-        
-        var divOpcion = inputRespuesta.parentElement;
-        var esCorrecta = respuestaNumero == respuesta.pregunta.respuesta;
-
-        var pPuntos = document.createElement("p");
-        pPuntos.classList.add("text-danger");
-        var puntos;
-        if(esCorrecta){
-            divOpcion.style.backgroundColor = "aquamarine";
-            puntos = infoJuego.tiempo_pregunta - respuesta.tiempo + 1; 
-        }
-        else{
-            divOpcion.style.backgroundColor = "rgb(255, 74, 71)";
-            puntos = 0;
-        }
-
-        
-        pPuntos.textContent = "Puntos: " + puntos;
-        divPregunta.appendChild(pPuntos);
-        divRespuestas.appendChild(divPregunta);
-    })
-
-}
-
 function getProgreso(conteo, tiempoMaximo){
     return (conteo / tiempoMaximo) * 100;
 }
 
 var divDatosJuego = document.getElementById("datos_juego");
 function handleMessage(evento){
-    mensaje = evento.data;
+    let mensaje = evento.data;
     //console.log("mensaje recibido " + mensaje);
     var json = JSON.parse(mensaje);
     switch(json.tipo){
@@ -457,9 +253,9 @@ function handleMessage(evento){
             divDatosJuego.innerHTML = '';
             var idsesion = document.createElement('h1');
             idsesion.textContent = "Id de sesion: " + json.id_sesion;
-            infoJuego.id_sesion = json.id_sesion;
-            infoJuego.tiempo_pregunta = json.tiempo_pregunta;
-            infoJuego.maximo_preguntas = json.maximo_preguntas;
+            gm.infoJuego.id_sesion = json.id_sesion;
+            gm.infoJuego.tiempo_pregunta = json.tiempo_pregunta;
+            gm.infoJuego.maximo_preguntas = json.maximo_preguntas;
             
             divDatosJuego.appendChild(idsesion);
             var tableJugadores = jugadoresToTable(json.jugadores);
@@ -467,7 +263,7 @@ function handleMessage(evento){
             var divBotones = document.createElement('div');
 
             if(soyLider){
-                mostrarInfoLider(divBotones);
+                mostrarInfoLider(divBotones, iniciarJuego, configurarJuego);
             }else{
                 var esperando = document.createElement('p');
                 esperando.textContent = 'Esperando al lider...';
@@ -487,12 +283,12 @@ function handleMessage(evento){
             divBotones.appendChild(buttonAddPregunta);
             divDatosJuego.appendChild(divBotones);
 
-            infoJuego.estado = "en_espera";
+            gm.infoJuego.estado = "en_espera";
             break;
 
         case "pregunta":
             salida.innerHTML = '';
-            //var contador = infoJuego.tiempo_pregunta;
+            //var contador = gm.infoJuego.tiempo_pregunta;
             var divProgreso = document.createElement('div');
             divProgreso.classList.add("progress", "my-3");
             divProgreso.style.width = "70%";
@@ -500,7 +296,7 @@ function handleMessage(evento){
             divBarra.classList.add("progress-bar");
             divBarra.style.width = "0%";
             divBarra.id = "barra";
-            divBarra.style.animationDuration = infoJuego.tiempo_pregunta + "s";
+            divBarra.style.animationDuration = gm.infoJuego.tiempo_pregunta + "s";
             divProgreso.appendChild(divBarra);
             salida.appendChild(divProgreso);
             var preguntaElement = preguntaToElement(json, "respuesta");
@@ -510,7 +306,7 @@ function handleMessage(evento){
             botonEnviar.classList.add("btn", "btn-primary")
             botonEnviar.onclick = () => {
                 var respuesta = document.querySelector('input[name="respuesta"]:checked');
-                var jsonEnviar = {"tipo" : "respuesta", "numero_pregunta" : json.numero_pregunta, "id_sesion" : infoJuego.id_sesion, "respuesta" : respuesta.value};
+                var jsonEnviar = {"tipo" : "respuesta", "numero_pregunta" : json.numero_pregunta, "id_sesion" : gm.infoJuego.id_sesion, "respuesta" : respuesta.value};
                 socket.send(JSON.stringify(jsonEnviar));
                 botonEnviar.style.display = "none";
 
@@ -530,22 +326,21 @@ function handleMessage(evento){
             break;
         case "finalizar_juego":
             salida.innerHTML = '<p class="text-info my-2">El juego ha finalizado</p>';
-            mostrarResultados(json);
+            render.mostrarResultados(json);
             var nicks = [];
             json.respuestas.forEach(respuesta => {
                 nicks.push(respuesta.nick);
             });
             var select = crearSelectNick(nicks);
-            select.value = infoJuego.nick;
-            select.onchange = () => {mostrarRespuestas(json.respuestas.find(respuesta => respuesta.nick == select.value).respuestas);};
+            select.value = gm.infoJuego.nick;
+            select.onchange = () => {render.mostrarRespuestas(json.respuestas.find(respuesta => respuesta.nick == select.value).respuestas);};
             salida.appendChild(select);
-            mostrarRespuestas(json.respuestas.find(respuesta => respuesta.nick == infoJuego.nick).respuestas);
-
+            render.mostrarRespuestas(json.respuestas.find(respuesta => respuesta.nick == gm.infoJuego.nick).respuestas);
             break;
         case "configurar_juego":
-            infoJuego.tiempo_pregunta = json.tiempo_pregunta;
-            infoJuego.maximo_preguntas = json.maximo_preguntas;
-            infoJuego.usar_preguntas_guardadas = json.usar_preguntas_guardadas;
+            gm.infoJuego.tiempo_pregunta = json.tiempo_pregunta;
+            gm.infoJuego.maximo_preguntas = json.maximo_preguntas;
+            gm.infoJuego.usar_preguntas_guardadas = json.usar_preguntas_guardadas;
             break;
         case "error":
             alert(json.mensaje);
@@ -554,8 +349,8 @@ function handleMessage(evento){
             salida.innerHTML = '<h1 class="text-danger">' + json.mensaje + '</h1>';
             break;
         case "sesiones":
-            sesiones = json.sesiones;
-            if(infoJuego.estado == "seleccion_sesion"){
+            gm.sesiones = json.sesiones;
+            if(gm.infoJuego.estado == "seleccion_sesion"){
                 mostrarListaSesiones(sesiones);
             }
             break;
@@ -582,7 +377,7 @@ btnOk.onclick = function(){
         soyLider = true;
     }
 
-    infoJuego.nick = jsonData.nick;
+    gm.infoJuego.nick = jsonData.nick;
     var json = JSON.stringify(jsonData);
     socket.send(json);
     salida.removeChild(form);
