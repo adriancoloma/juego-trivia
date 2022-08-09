@@ -351,7 +351,7 @@ function handleMessage(evento){
         case "sesiones":
             gm.sesiones = json.sesiones;
             if(gm.infoJuego.estado == "seleccion_sesion"){
-                mostrarListaSesiones(sesiones);
+                mostrarListaSesiones(gm.sesiones);
             }
             break;
     }
