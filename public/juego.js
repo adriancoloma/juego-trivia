@@ -55,6 +55,9 @@ function crearJuego(){
     }
     campo_nick.style.display = 'none';
     
+    var divCampoTipoSala = document.createElement("div");
+    divCampoTipoSala.id = "campo_tiposala";
+
     var labelTipoSala = document.createElement('label');
     labelTipoSala.textContent = "Tipo de sala: ";
     labelTipoSala.style.marginRight = "10px";
@@ -62,6 +65,8 @@ function crearJuego(){
     labelTipoSala.style.width = "200px";
     var selectTipoSala = crearSelectTipoDeSala();
     selectTipoSala.style.display = "inline";
+    divCampoTipoSala.appendChild(labelTipoSala);
+    divCampoTipoSala.appendChild(selectTipoSala);
 
     selectTipoSala.onchange = () =>{
         if(selectTipoSala.value == "privada"){
@@ -76,6 +81,7 @@ function crearJuego(){
     var campos = document.getElementById("campos");
     campos.appendChild(labelTipoSala);
     campos.appendChild(selectTipoSala);
+    //campos.appendChild(divCampoTipoSala);
     cambiarBotones();
 }
 
@@ -351,7 +357,7 @@ function handleMessage(evento){
         case "sesiones":
             gm.sesiones = json.sesiones;
             if(gm.infoJuego.estado == "seleccion_sesion"){
-                mostrarListaSesiones(gm.sesiones);
+                mostrarListaSesiones(gm.sesiones, campoPwd);
             }
             break;
     }

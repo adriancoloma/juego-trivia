@@ -128,7 +128,7 @@ function jugadoresToTable(jugadores){
     return table;
 }
 
-function mostrarListaSesiones(sesiones){
+function mostrarListaSesiones(sesiones, campoPwd){
     var selectActual = document.getElementById("id_sesion");
     if(selectActual != null){
         selectActual.remove();
