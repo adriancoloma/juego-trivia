@@ -33,7 +33,7 @@ function onSocketConnect(ws) {
         juego.jugadores.forEach((datos, socket) => socket.send(JSON.stringify({tipo : "error_fatal", mensaje : "El lider abandonó la sesion"})));
         juegos = juegos.filter(juegoActual => juegoActual.id != juego.id);  
         clearInterval(juego.intervaloActual); 
-        delete juego;  
+        //delete juego;  
         console.log('Sesion ' + juego.id + ' eliminada');
         clients.forEach(client => enviarSesiones(client));
       }else{
@@ -50,6 +50,14 @@ function onSocketConnect(ws) {
 
     console.log('Un cliente cerro su conexion');
   });
+}
+
+function getJuego(idSesion){
+  return juegos.find(juego => juego.id == idSesion);
+}
+
+function getJuegoPorCodigo(codigo){
+  return juegos.find(juego => juego.codigo == codigo);
 }
 
 function getJuegoDelJugador(ws){
@@ -88,18 +96,25 @@ function cargarPreguntasArchivo(juego){
   juego.addPreguntas(json.preguntas);
 }
 
-function getJuego(idSesion){
-  return juegos.find(juego => juego.id == idSesion);
+function unirseJuegoConCodigo(jugador, ws, codigo){
+  unirseJuego(jugador, null, null, ws, codigo);
 }
-
-function unirseJuego(jugador, idSesion, pwd, ws){
-  var juego = getJuego(idSesion);
+function unirseJuego(jugador, idSesion, pwd, ws, codigo = null){
+  var juego;
+  if(codigo == null){
+    juego = getJuego(idSesion);
+  }else{
+    juego = getJuegoPorCodigo(codigo);
+  }
+  
   if (juego == undefined){
     ws.send(JSON.stringify({tipo : "error", mensaje : "No existe la sesion"}));
     return;
   }
-
   var esValida = juego.validarPassword(pwd);
+  if(codigo != null){
+    esValida = true;
+  }
   if(esValida){
     juego.addJugador(jugador, ws);
     juego.jugadores.forEach((datos, socket) => enviarInformacionJuego(juego, socket));
@@ -146,6 +161,9 @@ function manejarMensaje(mensaje, ws){
       }else{
         unirseJuego(json.nick, json.id_sesion, json.pwd_sesion, ws);
       }
+      break;
+    case "unirse_juego":
+      unirseJuegoConCodigo(json.nick, ws, json.codigo);
       break;
     case "iniciar_juego":
       enviarPregunta(json.id_sesion);

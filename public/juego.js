@@ -1,6 +1,6 @@
 
 import { GameManager } from "./game_manager.js";
-import {preguntaToElement, mostrarListaSesiones, mostrarInfoLider, crearSelectNick, crearSelectTipoDeSala, jugadoresToTable, Renderizador} from "./render.js";
+import {addLinkJuego, preguntaToElement, mostrarListaSesiones, mostrarInfoLider, crearSelectNick, crearSelectTipoDeSala, jugadoresToTable, Renderizador} from "./render.js";
 var btnCrear = document.getElementById('btnCrear');
 var btnUnirse = document.getElementById('btnUnirse');
 var btnOk = document.getElementById('btnOk');
@@ -17,6 +17,9 @@ var gm = new GameManager();
 var render = new Renderizador(salida, divRespuestas, gm.infoJuego);
 
 function init(){
+
+
+
     if(location.protocol == "http:"){
         var url = "ws://" + location.host + "/ws";
     }
@@ -34,6 +37,47 @@ function init(){
         var mensaje = "Estas seguro de que quieres salir? Abandonaras la partida actual.";
         evt.returnValue = mensaje;
         return mensaje;
+    }
+
+    configurarSocket();
+
+    btnCrear.addEventListener('click', crearJuego, false);
+    btnUnirse.onclick = unirse;
+
+
+    btnOk.onclick = function () {
+        var form = document.getElementById("form_principal");
+        var formData = new FormData(form);
+        var jsonData = { "tipo": "datos_inicio" };
+        formData.forEach((value, key) => jsonData[key] = value);
+        if (jsonData.id_sesion == '') {
+            soyLider = true;
+        }
+
+        gm.infoJuego.nick = jsonData.nick;
+        var json = JSON.stringify(jsonData);
+        socket.send(json);
+        salida.removeChild(form);
+    }
+
+    if(window.location.search != ''){
+        var params = new URLSearchParams(window.location.search);
+        var codigo = params.get('cod');
+        btnCrear.style.display = 'none';
+        btnUnirse.onclick = () =>{
+            let nick = campo_nick.lastElementChild.value;
+            if(nick == ''){
+                alert("Introduce un nick");
+                return;
+            }
+
+            gm.infoJuego.nick = nick;
+            socket.send(JSON.stringify({
+                "tipo" : "unirse_juego",
+                "codigo" : codigo,
+                "nick" : nick
+            }));
+        };
     }
 
 }
@@ -257,12 +301,16 @@ function handleMessage(evento){
         case "datos_juego":
             console.log("Se recibieron los datos del juego");
             divDatosJuego.innerHTML = '';
+            let form = document.forms[0];
+            if(form != undefined){
+                form.remove();
+            }
             var idsesion = document.createElement('h1');
             idsesion.textContent = "Id de sesion: " + json.id_sesion;
             gm.infoJuego.id_sesion = json.id_sesion;
             gm.infoJuego.tiempo_pregunta = json.tiempo_pregunta;
             gm.infoJuego.maximo_preguntas = json.maximo_preguntas;
-            
+            addLinkJuego(divDatosJuego, json.codigo);
             divDatosJuego.appendChild(idsesion);
             var tableJugadores = jugadoresToTable(json.jugadores);
             divDatosJuego.appendChild(tableJugadores);
@@ -366,27 +414,6 @@ function handleMessage(evento){
 function configurarSocket(){
     socket.onmessage = handleMessage;
     socket.onclose = () =>{salida.innerHTML = '<h1 class="text-danger">Error al conectar al servidor</h1>'}
-}
-
-configurarSocket();
-
-btnCrear.addEventListener('click', crearJuego, false);
-btnUnirse.addEventListener('click', unirse, false);
-
-
-btnOk.onclick = function(){
-    var form = document.getElementById("form_principal");
-    var formData = new FormData(form);
-    var jsonData = {"tipo" : "datos_inicio"};
-    formData.forEach((value, key) => jsonData[key] = value);
-    if(jsonData.id_sesion == ''){
-        soyLider = true;
-    }
-
-    gm.infoJuego.nick = jsonData.nick;
-    var json = JSON.stringify(jsonData);
-    socket.send(json);
-    salida.removeChild(form);
 }
 
 

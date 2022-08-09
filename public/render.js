@@ -220,4 +220,39 @@ function crearSelectTipoDeSala(){
     return selectTipoSala;
 }
 
-export {Renderizador, preguntaToElement, mostrarListaSesiones, mostrarInfoLider, crearSelectNick, crearSelectTipoDeSala, jugadoresToTable};
+function addLinkJuego(divInfoJuego, codigo){
+    var h2 = document.createElement('h2');
+    h2.textContent = "Comparte este link con tus amigos";
+    h2.classList.add("text-info", "mb-3");
+    divInfoJuego.appendChild(h2);
+
+    let link = window.location.origin + "/?cod=" +codigo;
+    let divInputGroup = document.createElement('div');
+    divInputGroup.classList.add("input-group");
+    divInputGroup.classList.add("mb-3");
+    let input = document.createElement('input');
+    input.classList.add("form-control");
+    input.type = "text";
+    input.value = link;
+    input.readOnly = true;
+    input.style.width = "600px";
+    
+    let divInputGroupAppend = document.createElement('div');
+    divInputGroupAppend.classList.add("input-group-append");
+    let button = document.createElement('button');
+    button.classList.add("btn", "btn-primary");
+    button.type = "button";
+    button.textContent = "Copiar";
+    button.onclick = () =>{
+        input.select();
+        navigator.clipboard.writeText(input.value);
+    }
+
+    divInputGroup.appendChild(input);
+    divInputGroupAppend.appendChild(button);
+    divInputGroup.appendChild(divInputGroupAppend);
+
+    divInfoJuego.appendChild(divInputGroup);
+}
+
+export {Renderizador, addLinkJuego, preguntaToElement, mostrarListaSesiones, mostrarInfoLider, crearSelectNick, crearSelectTipoDeSala, jugadoresToTable};

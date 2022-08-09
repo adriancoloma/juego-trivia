@@ -1,5 +1,5 @@
  
-
+let GeneradorCodigos = require('./GeneradorCodigos.js');
 class Trivia{
     static estados ={
         "esperando_jugadores" : 0,
@@ -21,6 +21,8 @@ class Trivia{
         this.preguntasCargadas = this.preguntas;
         this.numeroPreguntasCargadas = this.preguntas.length;
         this.conteoActual = 0;
+        this.codigo = GeneradorCodigos.getInstance().generarCodigo();
+        console.log("codigo " + this.codigo);
     }
 
     set usarPreguntasGuardadas(usar){
@@ -155,7 +157,7 @@ class Trivia{
     getInformacion(){
         var json = {"tipo" : "datos_juego", "id_sesion" : this.id, "jugadores" : this.getNickJugadores()
         , "tiempo_pregunta" : this.tiempoPregunta, "maximo_preguntas" : this.maximoPreguntas, "tiene_password" : this.tienePassword(),
-        "estado" : this.estado};
+        "estado" : this.estado, "codigo" : this.codigo};
   
         return json;
     }
@@ -176,4 +178,6 @@ class Trivia{
 }
 
 module.exports = Trivia;
+
+
 
