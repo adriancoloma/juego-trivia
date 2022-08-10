@@ -84,17 +84,11 @@ function crearJuego(lider, pwd, ws){
   var idSesion = juegos.push(nuevoJuego) - 1;
   nuevoJuego.id = idSesionActual;
   idSesionActual++;
-  //cargarPreguntasArchivo(nuevoJuego);
 
   enviarInformacionJuego(nuevoJuego, ws);
   clients.forEach(client => enviarSesiones(client));
 }
 
-function cargarPreguntasArchivo(juego){
-  var raw = fs.readFileSync('preguntas.json');
-  var json = JSON.parse(raw);
-  juego.addPreguntas(json.preguntas);
-}
 
 function unirseJuegoConCodigo(jugador, ws, codigo){
   unirseJuego(jugador, null, null, ws, codigo);

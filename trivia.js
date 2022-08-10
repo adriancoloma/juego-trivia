@@ -183,7 +183,7 @@ class Trivia{
             //console.log("Se reinicio respuestas de " + datos.nick);
         }
         )
-
+        this.preguntas = this.cargarPreguntas("preguntas.json");
         this.preguntaActual = 0;
 
     }
