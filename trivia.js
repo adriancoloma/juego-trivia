@@ -175,6 +175,19 @@ class Trivia{
             }, 1000);
     }
 
+    reiniciar(){
+        this.conteoActual = 0;
+        this.jugadores.forEach((datos,socket) => {
+            datos.respuestas = [];
+            datos.puntaje = 0;
+            //console.log("Se reinicio respuestas de " + datos.nick);
+        }
+        )
+
+        this.preguntaActual = 0;
+
+    }
+
 }
 
 module.exports = Trivia;

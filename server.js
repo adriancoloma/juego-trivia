@@ -150,6 +150,13 @@ function enviarSesiones(ws){
   ws.send(JSON.stringify({tipo : "sesiones", sesiones : informacionJuegos}));
 }
 
+function iniciarJuego(idSesion){
+  enviarPregunta(idSesion);
+  var juego = getJuego(idSesion);
+  juego.iniciarTimer(() => {enviarPregunta(idSesion)});
+  juego.estado = Trivia.estados.jugando;
+}
+
 function manejarMensaje(mensaje, ws){
   const json = JSON.parse(mensaje);
   console.log("Mensaje recibido " + mensaje);
@@ -166,11 +173,7 @@ function manejarMensaje(mensaje, ws){
       unirseJuegoConCodigo(json.nick, ws, json.codigo);
       break;
     case "iniciar_juego":
-      enviarPregunta(json.id_sesion);
-      var juego = getJuego(json.id_sesion);
-      juego.iniciarTimer(() => {enviarPregunta(json.id_sesion)});
-
-      juego.estado = Trivia.estados.jugando;
+      iniciarJuego(json.id_sesion);
       break;
 
     case "respuesta":
@@ -198,6 +201,11 @@ function manejarMensaje(mensaje, ws){
     case "get_sesiones":
       enviarSesiones(ws);
       break;
+    case "volver_a_jugar":
+      var juego = getJuego(json.id_sesion);
+      juego.reiniciar();
+      juego.jugadores.forEach((datos, socket) => enviarInformacionJuego(juego, socket));
+      
   }
 
 }

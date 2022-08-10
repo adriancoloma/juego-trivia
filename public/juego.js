@@ -8,13 +8,13 @@ var campo_nick = document.getElementById("campo_nick");
 var campoId = document.getElementById("campo_idsesion");
 var campoPwd = document.getElementById("campo_pwd");
 
-var soyLider = false;
+
 var salida = document.querySelector('#salida');
 var divRespuestas = document.createElement("div");
 
 var socket;
 var gm = new GameManager();
-var render = new Renderizador(salida, divRespuestas, gm.infoJuego);
+
 
 function init(){
 
@@ -51,7 +51,7 @@ function init(){
         var jsonData = { "tipo": "datos_inicio" };
         formData.forEach((value, key) => jsonData[key] = value);
         if (jsonData.id_sesion == '') {
-            soyLider = true;
+            gm.soyLider = true;
         }
 
         gm.infoJuego.nick = jsonData.nick;
@@ -84,6 +84,7 @@ function init(){
 
 init();
 
+var render = new Renderizador(salida, divRespuestas, gm,socket);
 
 function cambiarBotones(){
     btnCrear.style.display = 'none';
@@ -292,7 +293,6 @@ function getProgreso(conteo, tiempoMaximo){
     return (conteo / tiempoMaximo) * 100;
 }
 
-var divDatosJuego = document.getElementById("datos_juego");
 function handleMessage(evento){
     let mensaje = evento.data;
     //console.log("mensaje recibido " + mensaje);
@@ -300,7 +300,9 @@ function handleMessage(evento){
     switch(json.tipo){
         case "datos_juego":
             console.log("Se recibieron los datos del juego");
-            divDatosJuego.innerHTML = '';
+            salida.innerHTML = "";
+            let divDatosJuego = document.createElement("div");
+            salida.appendChild(divDatosJuego);
             let form = document.forms[0];
             if(form != undefined){
                 form.remove();
@@ -316,7 +318,7 @@ function handleMessage(evento){
             divDatosJuego.appendChild(tableJugadores);
             var divBotones = document.createElement('div');
 
-            if(soyLider){
+            if(gm.soyLider){
                 mostrarInfoLider(divBotones, iniciarJuego, configurarJuego);
             }else{
                 var esperando = document.createElement('p');
@@ -408,6 +410,8 @@ function handleMessage(evento){
                 mostrarListaSesiones(gm.sesiones, campoPwd);
             }
             break;
+        
+
     }
 }
 

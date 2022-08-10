@@ -1,9 +1,11 @@
 
 class Renderizador{
-    constructor(salida, divRespuestas, infoJuego){
+    constructor(salida, divRespuestas, gm, ws){
         this.salida = salida;
         this.divRespuestas = divRespuestas;
-        this.infoJuego = infoJuego;
+        this.infoJuego = gm.infoJuego;
+        this.ws = ws;
+        this.gm = gm;
     }
 
     mostrarResultados(json){
@@ -16,6 +18,18 @@ class Renderizador{
         divResultados.style.backgroundColor = "white";
         divResultados.style.borderRadius = "10px";
         divResultados.style.width = "50%";
+
+        if(this.gm.soyLider){
+            let botonVolverAJugar = document.createElement('button');
+            botonVolverAJugar.classList.add("btn", "btn-primary");
+            botonVolverAJugar.textContent = "Volver a jugar";
+            botonVolverAJugar.onclick = () => {
+                this.ws.send(JSON.stringify({"tipo": "volver_a_jugar", "id_sesion" : this.infoJuego.id_sesion}));
+            }
+    
+            this.salida.appendChild(botonVolverAJugar);
+        }
+
         var h1Resultados = document.createElement('h1');
         h1Resultados.textContent = "Resultados";
         h1Resultados.classList.add("text-primary");
@@ -30,7 +44,9 @@ class Renderizador{
         });
     
         divResultados.appendChild(olPuntajes);
+
         this.salida.appendChild(divResultados);
+        
     }
 
     mostrarRespuestas(respuestas){
