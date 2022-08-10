@@ -312,7 +312,8 @@ function handleMessage(evento){
             gm.infoJuego.id_sesion = json.id_sesion;
             gm.infoJuego.tiempo_pregunta = json.tiempo_pregunta;
             gm.infoJuego.maximo_preguntas = json.maximo_preguntas;
-            addLinkJuego(divDatosJuego, json.codigo);
+            if(gm.soyLider)
+                addLinkJuego(divDatosJuego, json.codigo);
             divDatosJuego.appendChild(idsesion);
             var tableJugadores = jugadoresToTable(json.jugadores);
             divDatosJuego.appendChild(tableJugadores);
