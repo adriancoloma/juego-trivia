@@ -53,23 +53,18 @@ class Renderizador{
         this.divRespuestas.innerHTML = '';
         this.divRespuestas.innerHTML = '<p>Respuestas:</p>';
         this.salida.appendChild(this.divRespuestas);
-        respuestas.forEach((respuesta, i) => {
-            var divPregunta = preguntaToElement(respuesta.pregunta, "respuesta" + i);
+        respuestas.forEach((respuesta, i) => {            
+            var divPregunta = TriviaManager.preguntaToElement(respuesta.pregunta, false);
+            this.divRespuestas.appendChild(divPregunta);
             divPregunta.classList.add("border", "border-primary", "p-2");
             var pTiempo = document.createElement("p");
             pTiempo.classList.add("text-primary");
             pTiempo.textContent = "Tiempo: " + respuesta.tiempo + " s";
             divPregunta.firstChild.before(pTiempo);
             var respuestaNumero = respuesta.respuesta;
-            var inputRespuesta = divPregunta.querySelector('input[value="'+respuestaNumero+'"]');
-            inputRespuesta.checked = true; //Marcamos la opcion correcta
-            var inputsRespuesta = divPregunta.querySelectorAll('input[type="radio"]');
-            inputsRespuesta.forEach(input => {
-                input.disabled = true;
-            }
-            );
-            
-            var divOpcion = inputRespuesta.parentElement;
+            var divOpcion = divPregunta.querySelector('div[id="'+respuestaNumero+'"]');
+    
+           // var divOpcion = inputRespuesta.parentElement;
             var esCorrecta = respuestaNumero == respuesta.pregunta.respuesta;
     
             var pPuntos = document.createElement("p");
@@ -87,40 +82,48 @@ class Renderizador{
             
             pPuntos.textContent = "Puntos: " + puntos;
             divPregunta.appendChild(pPuntos);
-            this.divRespuestas.appendChild(divPregunta);
+            
         })
     
     }
 }
 
+class TriviaManager{
 
-function preguntaToElement(pregunta, name){
-    var divPregunta = document.createElement('div');
-    var h1 = document.createElement('h1');
-    h1.textContent = pregunta.pregunta;
-    divPregunta.appendChild(h1);
-    divPregunta.style.marginBottom = "10px";
-    
-    pregunta.opciones.forEach((opcion, i) =>{
-        var divOpcion = document.createElement('div');
-        divOpcion.classList.add("form-check", "my-2", "mx-auto", "text-right", "border", "w-50");
-        divOpcion.style.padding = "0px";
-        var input = document.createElement('input');
-        input.classList.add("form-check-input");
-        input.type = "radio";
-        input.name = name;
-        input.value = i;
-        input.style.marginLeft = "10px";
-        var label = document.createElement('label');
-        label.classList.add("form-check-label", "float-right");
-        label.textContent = opcion;
+    static preguntaToElement(pregunta, puedeSeleccionar = true){
+        var divPregunta = document.createElement('div');
+        var h1 = document.createElement('h1');
+        h1.textContent = pregunta.pregunta;
+        divPregunta.appendChild(h1);
+        divPregunta.style.marginBottom = "10px";
         
-        divOpcion.appendChild(input);
-        divOpcion.appendChild(label);
-        divPregunta.appendChild(divOpcion);    
-    });
-
-    return divPregunta;
+        pregunta.opciones.forEach((opcion, i) =>{
+            var divOpcion = document.createElement('div');
+            divOpcion.classList.add("form-check", "my-2", "mx-auto", "text-right", "border", "w-50");
+            divOpcion.id = i;
+            divOpcion.style.padding = "0px";
+            if(puedeSeleccionar){
+                divOpcion.classList.add("div-button");
+                divOpcion.style.cursor = "pointer";
+                divOpcion.onclick = () => {
+                    divOpcion.parentElement.querySelectorAll('div[selected="true"]').forEach(div => {
+                        div.classList.remove("bg-warning");
+                    } );
+                    divOpcion.classList.add("bg-warning");
+                    divOpcion.setAttribute("selected", "true");
+                    this.opcionSeleccionada = i;
+                }
+            }
+            
+            var label = document.createElement('label');
+            label.classList.add("form-check-label", "float-right");
+            label.textContent = opcion;
+            divOpcion.appendChild(label);
+            divPregunta.appendChild(divOpcion);    
+        });
+    
+        return divPregunta;
+    }    
 }
 
 function jugadoresToTable(jugadores){
@@ -271,4 +274,4 @@ function addLinkJuego(divInfoJuego, codigo){
     divInfoJuego.appendChild(divInputGroup);
 }
 
-export {Renderizador, addLinkJuego, preguntaToElement, mostrarListaSesiones, mostrarInfoLider, crearSelectNick, crearSelectTipoDeSala, jugadoresToTable};
+export {Renderizador, TriviaManager, addLinkJuego, mostrarListaSesiones, mostrarInfoLider, crearSelectNick, crearSelectTipoDeSala, jugadoresToTable};

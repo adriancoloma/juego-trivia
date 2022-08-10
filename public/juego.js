@@ -1,6 +1,6 @@
 
 import { GameManager } from "./game_manager.js";
-import {addLinkJuego, preguntaToElement, mostrarListaSesiones, mostrarInfoLider, crearSelectNick, crearSelectTipoDeSala, jugadoresToTable, Renderizador} from "./render.js";
+import {addLinkJuego, TriviaManager, mostrarListaSesiones, mostrarInfoLider, crearSelectNick, crearSelectTipoDeSala, jugadoresToTable, Renderizador} from "./render.js";
 var btnCrear = document.getElementById('btnCrear');
 var btnUnirse = document.getElementById('btnUnirse');
 var btnOk = document.getElementById('btnOk');
@@ -14,7 +14,6 @@ var divRespuestas = document.createElement("div");
 
 var socket;
 var gm = new GameManager();
-
 
 function init(){
 
@@ -356,22 +355,22 @@ function handleMessage(evento){
             divBarra.style.animationDuration = gm.infoJuego.tiempo_pregunta + "s";
             divProgreso.appendChild(divBarra);
             salida.appendChild(divProgreso);
-            var preguntaElement = preguntaToElement(json, "respuesta");
+            var preguntaElement = TriviaManager.preguntaToElement(json);
             salida.appendChild(preguntaElement);
             var botonEnviar = document.createElement('button');
             botonEnviar.textContent = "Enviar";
             botonEnviar.classList.add("btn", "btn-primary")
             botonEnviar.onclick = () => {
-                var respuesta = document.querySelector('input[name="respuesta"]:checked');
-                var jsonEnviar = {"tipo" : "respuesta", "numero_pregunta" : json.numero_pregunta, "id_sesion" : gm.infoJuego.id_sesion, "respuesta" : respuesta.value};
+                var respuesta = TriviaManager.opcionSeleccionada;
+                var jsonEnviar = {"tipo" : "respuesta", "numero_pregunta" : json.numero_pregunta, "id_sesion" : gm.infoJuego.id_sesion, "respuesta" : respuesta};
                 socket.send(JSON.stringify(jsonEnviar));
                 botonEnviar.style.display = "none";
 
-                var radios = preguntaElement.querySelectorAll('input[type="radio"]');
-                radios.forEach(radio => {
-                    radio.disabled = true;
-                }
-                );
+                preguntaElement.querySelectorAll("div").forEach(div =>{
+                    div.classList.remove("div-button");
+                    div.onclick = null;
+                    div.style.cursor = "auto";
+                });
 
                 var respuestaEnviada = document.createElement('p');
                 respuestaEnviada.textContent = "Respuesta enviada";

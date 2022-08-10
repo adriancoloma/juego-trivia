@@ -17,3 +17,12 @@
     animation-timing-function: linear;
     animation-play-state: running;
 }
+
+.div-button:hover{
+    background-color: #cecece;
+    cursor: pointer;
+}
+
+.div-button label{
+    cursor: pointer;
+}
