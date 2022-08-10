@@ -301,6 +301,7 @@ function handleMessage(evento){
             console.log("Se recibieron los datos del juego");
             salida.innerHTML = "";
             let divDatosJuego = document.createElement("div");
+            divDatosJuego.id = "datos_juego";
             salida.appendChild(divDatosJuego);
             let form = document.forms[0];
             if(form != undefined){
@@ -409,6 +410,11 @@ function handleMessage(evento){
             if(gm.infoJuego.estado == "seleccion_sesion"){
                 mostrarListaSesiones(gm.sesiones, campoPwd);
             }
+            break;
+        case "actualizar_jugadores":
+            var tableJugadores = jugadoresToTable(json.jugadores);
+            var divDatos = document.getElementById("datos_juego");
+            divDatos.replaceChild(tableJugadores, divDatos.querySelector('table'));
             break;
         
 

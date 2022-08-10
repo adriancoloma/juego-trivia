@@ -39,7 +39,7 @@ function onSocketConnect(ws) {
       }else{
         juego.eliminarJugador(ws);
         if(juego.estado == Trivia.estados.esperando_jugadores){
-          juego.jugadores.forEach((datos, socket) => enviarInformacionJuego(juego, socket));
+          juego.jugadores.forEach((datos, socket) => enviarActualizacionJugadores(juego.getNickJugadores(), socket));
         }
       }
 
@@ -74,6 +74,10 @@ function enviarInformacionJuego(juego, ws){
   jsonParsed = JSON.stringify(json);
   ws.send(jsonParsed);
   console.log("se envio el mensaje " + jsonParsed);
+}
+
+function enviarActualizacionJugadores(jugadores, ws){
+  ws.send(JSON.stringify({tipo : "actualizar_jugadores", jugadores : jugadores}));
 }
 
 var idSesionActual = 0;
@@ -111,7 +115,13 @@ function unirseJuego(jugador, idSesion, pwd, ws, codigo = null){
   }
   if(esValida){
     juego.addJugador(jugador, ws);
-    juego.jugadores.forEach((datos, socket) => enviarInformacionJuego(juego, socket));
+    juego.jugadores.forEach((datos, socket) => {
+      if(jugador != datos.nick){ //No se envia los jugadores a quien se acaba de unir
+        enviarActualizacionJugadores(juego.getNickJugadores(), socket);
+      }else{
+        enviarInformacionJuego(juego, socket);
+      }
+    });
   }else{
     ws.send(JSON.stringify({tipo : "error", mensaje : "Password incorrecta"}));
   }
