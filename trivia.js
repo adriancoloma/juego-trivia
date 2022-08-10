@@ -17,7 +17,7 @@ class Trivia{
         this.maximoPreguntas = 10;
         this.estado = Trivia.estados.esperando_jugadores;
         this.usarArchivo = true;
-        this.preguntas = this.cargarPreguntas("preguntas.json");
+        this.preguntas = this.seleccionarPreguntas(this.cargarPreguntas("preguntas.json"));
         this.preguntasCargadas = this.preguntas;
         this.numeroPreguntasCargadas = this.preguntas.length;
         this.conteoActual = 0;
@@ -27,7 +27,7 @@ class Trivia{
 
     set usarPreguntasGuardadas(usar){
         if(usar && !this.usarArchivo){
-            this.preguntas.push(this.preguntasCargadas);
+            this.preguntas = this.preguntas.concat(this.preguntasCargadas);
         }else if(!usar){
             this.preguntas = this.preguntas.filter(pregunta => !this.preguntasCargadas.includes(pregunta));
         }
@@ -38,9 +38,11 @@ class Trivia{
     cargarPreguntas(archivo){
         let fs = require('fs');
         var todasPreguntas = JSON.parse(fs.readFileSync(archivo)).preguntas;
-        if(this.usarPreguntasGuardadas){
-            return todasPreguntas;
-        }
+        
+        return todasPreguntas;
+    }
+
+    seleccionarPreguntas(todasPreguntas){
         var preguntas = [];
         var numeroPreguntas = Math.floor(Math.random() * (todasPreguntas.length + 1));
         if(numeroPreguntas == 0){
@@ -183,7 +185,14 @@ class Trivia{
             //console.log("Se reinicio respuestas de " + datos.nick);
         }
         )
-        this.preguntas = this.cargarPreguntas("preguntas.json");
+
+        if(this.usarArchivo){
+            this.preguntas = this.seleccionarPreguntas(this.cargarPreguntas("preguntas.json"));
+            this.preguntasCargadas = this.preguntas;
+        }else{
+            this.preguntas = this.preguntas.sort(() => Math.random() - 0.5);
+        }
+        
         this.preguntaActual = 0;
 
     }
