@@ -20,6 +20,7 @@
             
         </tbody>
     </table>
+    <button class="btn btn-primary mt-3 d-block mx-auto" onclick="descargarPreguntas()">Descargar preguntas</button>
     <script>
         let ajax = new XMLHttpRequest();
         function getPreguntas(){
@@ -71,6 +72,16 @@
             });
         }
 
+        function descargarPreguntas(){
+            let preguntas = getPreguntas();
+            let json = JSON.stringify({preguntas: preguntas});
+            let blob = new Blob([json], {type: "application/json"});
+            let url = URL.createObjectURL(blob);
+            let link = document.createElement('a');
+            link.href = url;
+            link.download = "preguntas.json";
+            link.click();
+        }
         mostrarPreguntas();
     </script>
 </body>
