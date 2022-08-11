@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar pregunta</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+</head>
+<body>
+     <div class="text-center align-items-center">
+        <h1 class="text-primary">Editar pregunta</h1>
+        <label class="m-2">Pregunta:</label>
+        <input type="text" name="pregunta">
+        <h2 class="text-primary">Opciones</h2>
+        <div id="opciones">
+
+        </div>
+        <label class="m-2">Respuesta:</label>
+        <input class="mt-3" type="number" name="respuesta">
+        <button class="btn btn-primary mt-3 d-block mx-auto" onclick="actualizarPregunta()">Actualizar pregunta</button>
+        <div class="text-success m-3" id="mensaje-respuesta">
+
+        </div>
+    </div>
+     <script>
+        let parser = new URLSearchParams(window.location.search);
+        let id = parser.get('id');
+        let ajax = new XMLHttpRequest();
+        function getPregunta(id){
+            let pregunta;
+            ajax.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    // Typical action to be performed when the document is ready:
+                    pregunta = JSON.parse(ajax.responseText);
+                }
+            };
+    
+            ajax.open("GET", "/rest/preguntas/" + id, false);
+            ajax.send();
+            return pregunta;
+        }
+
+        function mostrarPregunta(pregunta){
+            let inputPregunta = document.querySelector('input[name="pregunta"]');
+            inputPregunta.value = pregunta.pregunta;
+            let div = document.querySelector('#opciones');
+            div.innerHTML = '';
+            pregunta.opciones.forEach(opcion => {
+                let input = document.createElement('input');
+                input.style.display = 'block';
+                input.classList.add('m-2', 'mx-auto');
+                input.type = 'text';
+                input.name = 'opcion';
+                input.value = opcion;
+                div.appendChild(input);
+            });
+
+            let inputRespuesta = document.querySelector('input[name="respuesta"]');
+            inputRespuesta.value = pregunta.respuesta;
+        }
+
+        function actualizarPregunta(){
+            let pregunta = leerPregunta();
+            let ajax = new XMLHttpRequest();
+            let respuesta = document.getElementById('mensaje-respuesta');
+            ajax.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    respuesta.innerHTML = 'Pregunta actualizada';
+                }else{
+                    respuesta.innerHTML = 'Error al actualizar pregunta';
+                }
+            };
+            ajax.open("PUT", "/rest/preguntas/" + id, false);
+            ajax.setRequestHeader("Content-Type", "application/json");
+            ajax.send(JSON.stringify(pregunta));
+        }
+
+        function leerPregunta(){
+            let pregunta = {id: id};
+            pregunta.pregunta = document.querySelector('input[name="pregunta"]').value;
+            pregunta.opciones = [];
+            let opciones = document.querySelectorAll('input[name="opcion"]');
+            opciones.forEach(opcion => {
+                pregunta.opciones.push(opcion.value);
+            });
+            pregunta.respuesta = parseInt(document.querySelector('input[name="respuesta"]').value);
+            return pregunta;
+        }
+        
+
+        
+        let pregunta = getPregunta(id);
+        mostrarPregunta(pregunta);
+
+    
+     </script>
+</body>
+</html>

@@ -1,5 +1,7 @@
  
 let GeneradorCodigos = require('./GeneradorCodigos.js');
+let Datos = require('./Datos.js');
+let datos = Datos.getInstance();
 class Trivia{
     static estados ={
         "esperando_jugadores" : 0,
@@ -17,7 +19,7 @@ class Trivia{
         this.maximoPreguntas = 10;
         this.estado = Trivia.estados.esperando_jugadores;
         this.usarArchivo = true;
-        this.preguntas = this.seleccionarPreguntas(this.cargarPreguntas("preguntas.json"));
+        this.preguntas = this.seleccionarPreguntas(datos.getPreguntas());
         this.preguntasCargadas = this.preguntas;
         this.numeroPreguntasCargadas = this.preguntas.length;
         this.conteoActual = 0;
@@ -35,17 +37,10 @@ class Trivia{
         this.usarArchivo = usar;   
     }
 
-    cargarPreguntas(archivo){
-        let fs = require('fs');
-        var todasPreguntas = JSON.parse(fs.readFileSync(archivo)).preguntas;
-        
-        return todasPreguntas;
-    }
-
     seleccionarPreguntas(todasPreguntas){
         var preguntas = [];
         var numeroPreguntas = Math.floor(Math.random() * (todasPreguntas.length + 1));
-        if(numeroPreguntas == 0){
+        if(numeroPreguntas == 0 || isNaN(numeroPreguntas)){
             numeroPreguntas = 2;
         }
         for(var i = 0; i < numeroPreguntas; i++){
@@ -187,7 +182,7 @@ class Trivia{
         )
 
         if(this.usarArchivo){
-            this.preguntas = this.seleccionarPreguntas(this.cargarPreguntas("preguntas.json"));
+            this.preguntas = this.seleccionarPreguntas(datos.getPreguntas("preguntas.json"));
             this.preguntasCargadas = this.preguntas;
         }else{
             this.preguntas = this.preguntas.sort(() => Math.random() - 0.5);

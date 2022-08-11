@@ -2,10 +2,16 @@ const ws = require('ws');
 const Trivia = require('./trivia.js');
 const express = require('express');
 const fs = require('fs');
+const Datos = require('./Datos.js');
+const rest = require('./rest.js');
+const bodyParser = require('body-parser');
+let datos = Datos.getInstance();
 
 var app = express();
 
+app.use(bodyParser.json());
 app.use(express.static('public'));
+app.use('/rest', rest);
 
 const PORT = process.env.PORT
 var httpServer = app.listen(PORT || 80, () => console.log("Server iniciado"));
@@ -188,9 +194,7 @@ function manejarMensaje(mensaje, ws){
     
     case "pregunta":
       getJuego(json.id_sesion).addPregunta(json.pregunta);
-      var preguntasGuardadas = JSON.parse(fs.readFileSync('preguntas.json'));
-      preguntasGuardadas.preguntas.push(json.pregunta);
-      fs.writeFileSync('preguntas.json', JSON.stringify(preguntasGuardadas));
+      datos.addPregunta(json.pregunta);
       
       console.log("Se añadio la pregunta " + json.pregunta);
       break;
