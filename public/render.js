@@ -99,7 +99,9 @@ class TriviaManager{
         
         pregunta.opciones.forEach((opcion, i) =>{
             var divOpcion = document.createElement('div');
-            divOpcion.classList.add("form-check", "my-2", "mx-auto", "text-right", "border", "w-50");
+            divOpcion.classList.add("my-2", "mx-auto", "text-right", "border", "w-50");
+            divOpcion.style.height = "50px";
+            divOpcion.style.borderRadius = "10px";
             divOpcion.id = i;
             divOpcion.style.padding = "0px";
             if(puedeSeleccionar){
