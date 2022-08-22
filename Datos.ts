@@ -1,12 +1,12 @@
 import * as fs from 'fs';
-interface Pregunta{
+export interface Pregunta{
     id: number;
     pregunta: string;
     opciones: string[];
     respuesta: number;
 }
 
-interface Datos{
+export interface Datos{
     getPreguntas(): Pregunta[];
     eliminarPregunta(id: number): void;
     addPregunta(pregunta: Pregunta): void;
@@ -17,13 +17,6 @@ export class DatosJSON implements Datos{
     private preguntas : Pregunta[];
     private path : string;
     private static instance : DatosJSON;
-
-    static getInstance() : DatosJSON{
-        if(this.instance == null){
-            this.instance = new DatosJSON();
-        }
-        return this.instance;
-    }
 
     private constructor(path : string = './preguntas.json'){
         this.path = path;

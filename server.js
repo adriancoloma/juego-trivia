@@ -5,7 +5,8 @@ const fs = require('fs');
 const Datos = require('./Datos.js');
 const rest = require('./rest.js');
 const bodyParser = require('body-parser');
-let datos = Datos.getInstance();
+const { DatosPostgres } = require('./DatosPostgres.js');
+let datos = new DatosPostgres();
 
 var app = express();
 
