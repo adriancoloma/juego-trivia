@@ -1,12 +1,22 @@
 import {Datos, Pregunta} from './Datos';
 import {Client} from 'pg';
+import { env } from 'process';
 
 export class DatosPostgres implements Datos{
     private client;
     
     constructor (){
-        this.client = new Client({connectionString: "postgres://wjnetxsrsbbdgx:d9a72cad67fb50f1ac6ac4ba9acd87860a465ace39125e601219b7bca084febb@ec2-3-225-110-188.compute-1.amazonaws.com:5432/d3hqt0l1r18v3o",
-        ssl: { rejectUnauthorized: false }});
+        if(process.env.DATABASE_URL){
+            this.client = new Client({
+                connectionString: process.env.DATABASE_URL,
+                ssl: true,
+            });
+        }else{	
+            this.client = this.client = new Client({connectionString: "postgres://wjnetxsrsbbdgx:d9a72cad67fb50f1ac6ac4ba9acd87860a465ace39125e601219b7bca084febb@ec2-3-225-110-188.compute-1.amazonaws.com:5432/d3hqt0l1r18v3o",
+            ssl: { rejectUnauthorized: false }});
+
+        }
+        
         this.client.connect();
         this.init();
     }
