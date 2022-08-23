@@ -1,4 +1,10 @@
 import * as fs from 'fs';
+import { DatosPostgres } from './DatosPostgres';
+
+export function getManejadorDatos() : Datos{
+    return new DatosPostgres();
+}
+
 export interface Pregunta{
     id: number;
     pregunta: string;
@@ -7,7 +13,7 @@ export interface Pregunta{
 }
 
 export interface Datos{
-    getPreguntas(): Pregunta[];
+    getPreguntas(): Promise<Pregunta[]>;
     eliminarPregunta(id: number): void;
     addPregunta(pregunta: Pregunta): void;
     setPreguntas(preguntas : Pregunta[]): void;
@@ -20,7 +26,9 @@ export class DatosJSON implements Datos{
 
     private constructor(path : string = './preguntas.json'){
         this.path = path;
-        this.preguntas = this.getPreguntas();
+        this.getPreguntas().then(preguntas => {
+            this.preguntas = preguntas;
+        } );
     }
 
     private getMayorId() : number{
@@ -33,8 +41,17 @@ export class DatosJSON implements Datos{
         return mayor;
     }
 
-    getPreguntas(): Pregunta[]{
-        return JSON.parse(fs.readFileSync(this.path, 'utf8')).preguntas;
+    getPreguntas(): Promise<Pregunta[]>{
+        return new Promise((resolve, reject) => {
+            fs.readFile(this.path, (err, data) => {
+                if(err){
+                    reject(err);
+                }
+                else{
+                    resolve(JSON.parse(data.toString()).preguntas);
+                }
+            } );
+        } );
     }
 
     getPregunta(id: number) : Pregunta | undefined{
@@ -69,6 +86,6 @@ export class DatosJSON implements Datos{
     }
 }
 
-module.exports = DatosJSON;
+
 
 

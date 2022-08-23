@@ -1,7 +1,7 @@
  
 let GeneradorCodigos = require('./GeneradorCodigos.js');
-let Datos = require('./Datos.js');
-let datos = Datos.getInstance();
+const {getManejadorDatos} = require('./Datos.js');
+let datos = getManejadorDatos();
 class Trivia{
     static estados ={
         "esperando_jugadores" : 0,
@@ -19,9 +19,13 @@ class Trivia{
         this.maximoPreguntas = 10;
         this.estado = Trivia.estados.esperando_jugadores;
         this.usarArchivo = true;
-        this.preguntas = this.seleccionarPreguntas(datos.getPreguntas());
-        this.preguntasCargadas = this.preguntas;
-        this.numeroPreguntasCargadas = this.preguntas.length;
+
+        datos.getPreguntas().then(preguntas => {
+            this.preguntas = this.seleccionarPreguntas(preguntas);
+            this.preguntasCargadas = this.preguntas;
+            this.numeroPreguntasCargadas = this.preguntas.length;
+        });
+        
         this.conteoActual = 0;
         this.codigo = GeneradorCodigos.getInstance().generarCodigo();
         console.log("codigo " + this.codigo);
@@ -172,7 +176,7 @@ class Trivia{
             }, 1000);
     }
 
-    reiniciar(){
+    async reiniciar(){
         this.conteoActual = 0;
         this.jugadores.forEach((datos,socket) => {
             datos.respuestas = [];
@@ -182,7 +186,8 @@ class Trivia{
         )
 
         if(this.usarArchivo){
-            this.preguntas = this.seleccionarPreguntas(datos.getPreguntas("preguntas.json"));
+            let preguntas = await datos.getPreguntas();
+            this.preguntas = this.seleccionarPreguntas(preguntas);
             this.preguntasCargadas = this.preguntas;
         }else{
             this.preguntas = this.preguntas.sort(() => Math.random() - 0.5);

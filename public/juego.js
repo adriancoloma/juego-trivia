@@ -294,7 +294,7 @@ function getProgreso(conteo, tiempoMaximo){
 
 function handleMessage(evento){
     let mensaje = evento.data;
-    //console.log("mensaje recibido " + mensaje);
+    console.log("mensaje recibido " + mensaje);
     var json = JSON.parse(mensaje);
     switch(json.tipo){
         case "datos_juego":

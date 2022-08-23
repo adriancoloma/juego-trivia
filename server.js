@@ -2,11 +2,10 @@ const ws = require('ws');
 const Trivia = require('./trivia.js');
 const express = require('express');
 const fs = require('fs');
-const Datos = require('./Datos.js');
+const {getManejadorDatos} = require('./Datos.js');
 const rest = require('./rest.js');
 const bodyParser = require('body-parser');
-const { DatosPostgres } = require('./DatosPostgres.js');
-let datos = new DatosPostgres();
+let datos = getManejadorDatos();
 
 var app = express();
 

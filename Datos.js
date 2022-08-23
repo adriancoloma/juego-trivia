@@ -1,19 +1,21 @@
 "use strict";
 exports.__esModule = true;
-exports.DatosJSON = void 0;
+exports.DatosJSON = exports.getManejadorDatos = void 0;
 var fs = require("fs");
+var DatosPostgres_1 = require("./DatosPostgres");
+function getManejadorDatos() {
+    return new DatosPostgres_1.DatosPostgres();
+}
+exports.getManejadorDatos = getManejadorDatos;
 var DatosJSON = /** @class */ (function () {
     function DatosJSON(path) {
         if (path === void 0) { path = './preguntas.json'; }
+        var _this = this;
         this.path = path;
-        this.preguntas = this.getPreguntas();
+        this.getPreguntas().then(function (preguntas) {
+            _this.preguntas = preguntas;
+        });
     }
-    DatosJSON.getInstance = function () {
-        if (this.instance == null) {
-            this.instance = new DatosJSON();
-        }
-        return this.instance;
-    };
     DatosJSON.prototype.getMayorId = function () {
         var mayor = 0;
         this.preguntas.forEach(function (pregunta) {
@@ -24,7 +26,17 @@ var DatosJSON = /** @class */ (function () {
         return mayor;
     };
     DatosJSON.prototype.getPreguntas = function () {
-        return JSON.parse(fs.readFileSync(this.path, 'utf8')).preguntas;
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            fs.readFile(_this.path, function (err, data) {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(JSON.parse(data.toString()).preguntas);
+                }
+            });
+        });
     };
     DatosJSON.prototype.getPregunta = function (id) {
         return this.preguntas.find(function (pregunta) { return pregunta.id == id; });
@@ -56,4 +68,3 @@ var DatosJSON = /** @class */ (function () {
     return DatosJSON;
 }());
 exports.DatosJSON = DatosJSON;
-module.exports = DatosJSON;
