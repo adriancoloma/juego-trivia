@@ -9,7 +9,7 @@ export class DatosPostgres implements Datos{
         if(process.env.DATABASE_URL){
             this.client = new Client({
                 connectionString: process.env.DATABASE_URL,
-                ssl: true,
+                ssl: { rejectUnauthorized: false },
             });
         }else{	
             this.client = this.client = new Client({connectionString: "postgres://wjnetxsrsbbdgx:d9a72cad67fb50f1ac6ac4ba9acd87860a465ace39125e601219b7bca084febb@ec2-3-225-110-188.compute-1.amazonaws.com:5432/d3hqt0l1r18v3o",

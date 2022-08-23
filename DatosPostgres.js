@@ -43,7 +43,7 @@ var DatosPostgres = /** @class */ (function () {
         if (process.env.DATABASE_URL) {
             this.client = new pg_1.Client({
                 connectionString: process.env.DATABASE_URL,
-                ssl: true
+                ssl: { rejectUnauthorized: false }
             });
         }
         else {
