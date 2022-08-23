@@ -14,8 +14,9 @@ module.exports = router;
 
 router.get('/preguntas/:id', (req, res) => {
     let id = req.params.id;
-    let pregunta = datos.getPregunta(id);
-    res.json(pregunta);
+    datos.getPregunta(id).then(function (pregunta) {
+        res.json(pregunta);
+    });
     } 
 );
 router.delete('/preguntas/:id', (req, res) =>{

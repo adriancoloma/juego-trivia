@@ -39,7 +39,18 @@ var DatosJSON = /** @class */ (function () {
         });
     };
     DatosJSON.prototype.getPregunta = function (id) {
-        return this.preguntas.find(function (pregunta) { return pregunta.id == id; });
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getPreguntas().then(function (preguntas) {
+                var pregunta = preguntas.find(function (p) { return p.id == id; });
+                if (pregunta == undefined) {
+                    reject("No existe la pregunta");
+                }
+                else {
+                    resolve(pregunta);
+                }
+            });
+        });
     };
     DatosJSON.prototype.eliminarPregunta = function (id) {
         this.preguntas = this.preguntas.filter(function (pregunta) { return pregunta.id != id; });

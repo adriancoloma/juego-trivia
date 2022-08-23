@@ -53,6 +53,24 @@ var DatosPostgres = /** @class */ (function () {
         this.client.connect();
         this.init();
     }
+    DatosPostgres.prototype.getPregunta = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var resultado, pregunta, opciones;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.client.query('SELECT * FROM pregunta WHERE id = $1', [id])];
+                    case 1:
+                        resultado = _a.sent();
+                        pregunta = resultado.rows[0];
+                        return [4 /*yield*/, this.getOpciones(pregunta.id)];
+                    case 2:
+                        opciones = _a.sent();
+                        pregunta.opciones = opciones;
+                        return [2 /*return*/, pregunta];
+                }
+            });
+        });
+    };
     DatosPostgres.prototype.init = function () {
         this.client.query("CREATE TABLE IF NOT EXISTS pregunta (id SERIAL PRIMARY KEY, pregunta VARCHAR(255) NOT NULL, respuesta INTEGER NOT NULL)", function (err, res) {
             if (err) {
@@ -113,7 +131,16 @@ var DatosPostgres = /** @class */ (function () {
         });
     };
     DatosPostgres.prototype.eliminarPregunta = function (id) {
-        throw new Error('Method not implemented.');
+        this.client.query('DELETE FROM pregunta WHERE id = $1', [id], function (err, res) {
+            if (err) {
+                console.log(err);
+            }
+        });
+        this.client.query('DELETE FROM opcion WHERE pregunta_id = $1', [id], function (err, res) {
+            if (err) {
+                console.log(err);
+            }
+        });
     };
     DatosPostgres.prototype.addPregunta = function (pregunta) {
         var _this = this;
@@ -123,7 +150,33 @@ var DatosPostgres = /** @class */ (function () {
             }
         });
         pregunta.opciones.forEach(function (opcion) {
-            _this.client.query('INSERT INTO opcion (pregunta_id, opcion) VALUES (LASTVAL(), $1)', [opcion], function (err, res) {
+            _this.client.query('INSERT INTO opcion (pregunta_id, opcion) VALUES ((SELECT max(id) FROM pregunta), $1)', [opcion], function (err, res) {
+                if (err) {
+                    console.log(err);
+                }
+            });
+        });
+    };
+    DatosPostgres.prototype.setPregunta = function (pregunta) {
+        var _this = this;
+        this.client.query('UPDATE pregunta SET pregunta = $1, respuesta = $2 WHERE id = $3', [pregunta.pregunta, pregunta.respuesta, pregunta.id], function (err, res) {
+            if (err) {
+                console.log(err);
+            }
+        });
+        var idsOpciones = [];
+        pregunta.opciones.forEach(function (opcion) {
+            _this.client.query('SELECT id FROM opcion WHERE opcion = $1', [opcion], function (err, res) {
+                if (err) {
+                    console.log(err);
+                }
+                else {
+                    idsOpciones.push(res.rows[0].id);
+                }
+            });
+        });
+        pregunta.opciones.forEach(function (opcion) {
+            _this.client.query('UPDATE opcion SET opcion = $1 WHERE id = $2', [opcion, idsOpciones.shift()], function (err, res) {
                 if (err) {
                     console.log(err);
                 }
@@ -131,7 +184,6 @@ var DatosPostgres = /** @class */ (function () {
         });
     };
     DatosPostgres.prototype.setPreguntas = function (preguntas) {
-        throw new Error('Method not implemented.');
     };
     return DatosPostgres;
 }());

@@ -17,6 +17,8 @@ export interface Datos{
     eliminarPregunta(id: number): void;
     addPregunta(pregunta: Pregunta): void;
     setPreguntas(preguntas : Pregunta[]): void;
+    setPregunta(pregunta: Pregunta): void;
+    getPregunta(id: number): Promise<Pregunta>;
 }
 
 export class DatosJSON implements Datos{
@@ -54,8 +56,19 @@ export class DatosJSON implements Datos{
         } );
     }
 
-    getPregunta(id: number) : Pregunta | undefined{
-        return this.preguntas.find(pregunta => pregunta.id == id);
+    getPregunta(id: number) : Promise<Pregunta >{
+        return new Promise((resolve, reject) => {
+            this.getPreguntas().then(preguntas => {
+                let pregunta = preguntas.find(p => p.id == id);
+                if(pregunta == undefined){
+                    reject("No existe la pregunta");
+                }else{
+                    resolve(pregunta);
+                }
+                
+            } );
+        } );
+
     }
 
     eliminarPregunta(id: number){

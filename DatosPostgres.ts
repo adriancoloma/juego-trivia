@@ -21,6 +21,16 @@ export class DatosPostgres implements Datos{
         this.init();
     }
 
+    async getPregunta(id: number): Promise<Pregunta> {
+        let resultado = await this.client.query('SELECT * FROM pregunta WHERE id = $1', [id]);
+        let pregunta = resultado.rows[0];
+    
+        const opciones = await this.getOpciones(pregunta.id);
+        pregunta.opciones = opciones;
+        return pregunta;
+
+    }
+
     private init(){
         this.client.query("CREATE TABLE IF NOT EXISTS pregunta (id SERIAL PRIMARY KEY, pregunta VARCHAR(255) NOT NULL, respuesta INTEGER NOT NULL)", (err, res) => {
             if(err){
@@ -67,25 +77,67 @@ export class DatosPostgres implements Datos{
     }
 
     eliminarPregunta(id: number): void {
-        throw new Error('Method not implemented.');
+        this.client.query('DELETE FROM pregunta WHERE id = $1', [id], (err, res) => {
+            if(err){
+                console.log(err);
+            }
+        } );
+        this.client.query('DELETE FROM opcion WHERE pregunta_id = $1', [id], (err, res) => {
+            if(err){
+                console.log(err);
+            }
+        } );
     }
 
     addPregunta(pregunta: Pregunta): void {
+        
         this.client.query('INSERT INTO pregunta (pregunta, respuesta) VALUES ($1, $2)', [pregunta.pregunta, pregunta.respuesta], (err, res) => {
             if(err){
                 console.log(err);
             }
         } );
         pregunta.opciones.forEach(opcion => {
-            this.client.query('INSERT INTO opcion (pregunta_id, opcion) VALUES (LASTVAL(), $1)', [opcion], (err, res) => {
+            this.client.query('INSERT INTO opcion (pregunta_id, opcion) VALUES ((SELECT max(id) FROM pregunta), $1)', [opcion], (err, res) => {
                 if(err){
                     console.log(err);
                 }
             } );
         } );
     }
+
+    setPregunta(pregunta: Pregunta): void {
+        this.client.query('UPDATE pregunta SET pregunta = $1, respuesta = $2 WHERE id = $3', [pregunta.pregunta, pregunta.respuesta, pregunta.id], (err, res) => {
+            if(err){
+                console.log(err);
+            }
+        }
+        );
+
+        let idsOpciones = [];
+        pregunta.opciones.forEach(opcion => {
+            this.client.query('SELECT id FROM opcion WHERE opcion = $1', [opcion], (err, res) => {
+                if(err){
+                    console.log(err);
+                }
+                else{
+                    idsOpciones.push(res.rows[0].id);
+                }
+            } );
+        } );
+
+        pregunta.opciones.forEach(opcion => {
+            this.client.query('UPDATE opcion SET opcion = $1 WHERE id = $2', [opcion, idsOpciones.shift()], (err, res) => {
+                if(err){
+                    console.log(err);
+                }
+            } );
+        } );
+
+
+    }
+
     setPreguntas(preguntas: Pregunta[]): void {
-        throw new Error('Method not implemented.');
+        
     }
    
     
