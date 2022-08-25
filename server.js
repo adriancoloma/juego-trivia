@@ -5,13 +5,17 @@ const fs = require('fs');
 const {getManejadorDatos} = require('./Datos.js');
 const rest = require('./rest.js');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 let datos = getManejadorDatos();
 
 var app = express();
 
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 app.use('/rest', rest);
+
+
 
 const PORT = process.env.PORT
 var httpServer = app.listen(PORT || 80, () => console.log("Server iniciado"));

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>]
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+</head>
+<body>
+    <div class="text-center align-items-center">
+        <h1 class="text-primary">Login</h1>
+        <label class="m-2">Usuario:</label>
+        <input type="text" name="usuario">
+        <label class="m-2">Contraseña:</label>
+        <input type="password" name="contrasena">
+        <button class="btn btn-primary mt-3 d-block mx-auto" onclick="login()">Login</button>
+        
+    </div>
+
+    <script>
+        function login(){
+            let usuario = document.querySelector('input[name="usuario"]').value;
+            let contrasena = document.querySelector('input[name="contrasena"]').value;
+            let ajax = new XMLHttpRequest();
+            ajax.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    // Typical action to be performed when the document is ready:
+                    let respuesta = JSON.parse(ajax.responseText);
+                    document.cookie = "token=" + respuesta.token;
+                    window.location.href = '/admin.html';
+                    
+                }
+
+                if(this.readyState == 4 && this.status == 401){
+                    alert('Usuario o contraseña incorrectos');
+                }
+            };
+            ajax.open("POST", "/rest/login", true);
+            ajax.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            ajax.send(JSON.stringify({usuario: usuario, password: contrasena}));
+        }
+    </script>
+</body>
+</html>
